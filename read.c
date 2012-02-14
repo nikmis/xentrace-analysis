@@ -6,11 +6,13 @@
 #define FAIL 		-1
 #define SUCCESS 	0
 #define MAX_EV_DATA 	7
+#define MAX_DOMS	25
 
 #define TRAP 		0x0020f003
 #define SWITCH_INFPREV	0x0002800e
 #define SWITCH_INFNEXT	0x0002800f
 
+/* Struct for storing Events */
 typedef struct 
 {
 	unsigned int event_id;
@@ -20,21 +22,31 @@ typedef struct
 	unsigned int data[MAX_EV_DATA];
 } Event;
 
+/* Struct for storing SWITCH_INFPREV related data */
+typedef struct
+{
+	unsigned int dom_id;
+	unsigned long long runtime;
+} DomTime;
+
 /* Helper functions */
 int check_null(void *, void *);
+unsigned short add_time_to_list(DomTime *, Event *);
 
-/* Generic event parse */
+/* Generic event parse functions */
 int parse_event(Event *, FILE *, unsigned int);
 int parse_next_event(Event *, FILE *);
 void clear_event(Event *);
 
-/* Modular event parse */
+/* Modular event parse functions */
 int parse_event_id(Event *, FILE *);
 int parse_timestamp(Event *, FILE *);
 int parse_event_data(Event *, FILE *);
 
-/* Event specfic parse */
+/* Event specfic parse functions */
 int parse_trap(Event *, FILE *);
+void generate_cpu_share_stats(FILE *, unsigned int);
+
 
 int main(int argc, char *argv[])
 {
@@ -101,6 +113,93 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+/* Description:	Event specfic parse function
+   Parses SWITCH_INFPREV events and prints the cpu time-sharing stats 
+ */
+void generate_cpu_share_stats(FILE *fp, unsigned int ev_id)
+{
+	unsigned long long	total_time = 0;
+	unsigned short		num_of_doms = 0;
+	unsigned short		i = 0;
+	Event ev;
+	DomTime dt[MAX_DOMS];
+
+	/* Init Struct */
+	clear_event(&ev);
+
+	while(!feof(fp))
+	{
+		if(parse_event(&ev, fp, SWITCH_INFPREV) != FAIL)
+		{
+			num_of_doms = add_time_to_list(dt, &ev);
+			total_time += ev.data[1];
+		}
+	} /* EOF reached. */
+	
+	while((i < num_of_doms) && (i < MAX_DOMS))
+	{
+		printf("Dom ID = %d Cpu_Time = %lld Total_Time = %lld Cpu_Time_Share = %.2f %%\n", 
+				dt[i].dom_id, 
+				dt[i].runtime, 
+				total_time, 
+				((float)dt[i].runtime/total_time)*100);
+		++i;
+	}
+}
+
+/* Description:	Helper function for generate_cpu_share_stats()
+   Searches for existing domain id data.
+   if dom exists
+   	update runtime
+   else
+   	add new dom and its runtime
+ */
+unsigned short add_time_to_list(DomTime *dt, Event *ev)
+{
+	static unsigned short num = 0;
+	unsigned short i = 0;
+
+	/* Search if domain already exists. 
+
+	   Hash Table is the ideal abstraction for
+	   looking up dom ids. Instead I am using
+	   Linear Search on the list/array, since list 
+	   size will be small and HT will be overkill.
+	 */
+	while(i < num)
+	{
+		if(dt[i].dom_id == ev->data[0])
+		{
+			dt[i].runtime += ev->data[1];
+
+			/* No new doms added */
+			return num;
+		}
+		
+		++i;
+	}
+
+	if (num == MAX_DOMS)
+	{
+		/* No new doms can be added */
+		return num;
+	}
+
+	/* If not found add new dom and its time.
+	   Update num
+	 */
+	dt[i].dom_id = ev->data[0];
+	dt[i].runtime = ev->data[1];
+
+	num = i + 1; /* +1 since array index starts at 0 */
+
+	return num;
+}
+
+/* Description:	Generic event parse function
+   Parses event passed as function argument.
+   Returns FAIL if event not found.
+ */
 int parse_event(Event *ev, FILE *fp, unsigned int ev_id)
 {
 	Event tmp_ev;
@@ -126,7 +225,10 @@ int parse_event(Event *ev, FILE *fp, unsigned int ev_id)
 	/* fprintf(stdout, "%s:%d:parse_event: EOF file reached", __FILE__, __LINE__); */
 	return FAIL;
 }
-
+/* Description:	Generic event parse function
+   Parses the next event in log file. 
+   Uses modular parse functions
+ */
 int parse_next_event(Event *ev, FILE *fp)
 {
 	if(parse_event_id(ev, fp) == FAIL)
@@ -150,6 +252,9 @@ int parse_next_event(Event *ev, FILE *fp)
 	return SUCCESS;
 }
 
+/* Description:	Modular event parse function
+   Parses the event id and related metadata.
+ */
 int parse_event_id(Event *ev, FILE *fp)
 {
 	unsigned int x; 
@@ -177,6 +282,9 @@ int parse_event_id(Event *ev, FILE *fp)
 	return SUCCESS;
 }
 
+/* Description:	Modular event parse function
+   Parses timestamp realted to event.
+ */
 int parse_timestamp(Event *ev, FILE *fp)
 {
 	unsigned long long x;
@@ -208,6 +316,9 @@ int parse_timestamp(Event *ev, FILE *fp)
 	return SUCCESS;
 }
 
+/* Description:	Modular event parse function
+   Parses event data 
+ */
 int parse_event_data(Event *ev, FILE *fp)
 {
 	unsigned int i = 0;
@@ -237,6 +348,10 @@ int parse_event_data(Event *ev, FILE *fp)
 	return SUCCESS;
 }
 
+/* Description:	Helper function
+   Sets all event data to 0
+   Used to init and reset Event struct.
+ */
 void clear_event(Event *ev)
 {
 	ev->event_id = 0;
@@ -246,6 +361,9 @@ void clear_event(Event *ev)
 	memset(ev->data, 0, MAX_EV_DATA);
 }
 		
+/* Description:	Helper function
+   Checks null pointers.
+ */
 int check_null(void *ev, void *fp)
 {
 	if((ev == NULL) || (fp == NULL))
