@@ -1,0 +1,8 @@
+DESIGN
+- Refactor Code to support multi level event abstraction
+
+ADD
+- Use Linked list or better struct in cpu time sharing handler.
+
+TEST
+- Need to test cpu time sharing code.
