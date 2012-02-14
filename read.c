@@ -110,11 +110,16 @@ int main(int argc, char *argv[])
 		clear_event(&event);
 	}
 
+	fclose(fp);
+
 	return 0;
 }
 
 /* Description:	Event specfic parse function
    Parses SWITCH_INFPREV events and prints the cpu time-sharing stats 
+
+   To-Do: 
+   - Use Linked list instead of fixed len array for DomTime. 
  */
 void generate_cpu_share_stats(FILE *fp, unsigned int ev_id)
 {
