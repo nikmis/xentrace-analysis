@@ -1,0 +1,143 @@
+Main idea: funcs and data structures
+-----------------------------------------------
+
+The reader_loop is our main function, it imlements a main processing loop: i)
+reads the log file, ii) parses events, and upcalls event processing handlers.
+
+Basically the reader_loop() is the following: 
+
+  int reader_loop(struct reader *reader) {
+        struct event event;
+         
+        call_initializers(reader);
+
+        do { 
+            ret = fetch_next_event(reader->log, &event);
+            if (ret)
+                break;
+            
+	    call_handlers(reader->handlers, &event);
+
+        } while(1);
+
+        call_finalizers(reader);
+  }
+
+The fetch_next_event() function reads the next event from the log file, fills
+in the event structure, and passes event to the call_handlers function. Note,
+we don't allocate memory on the critical pass, and reuse the same event struct. 
+
+The call_handlers() function is responsible for invoking all handlers
+registered for this event. It's something like this: 
+
+   /* 
+    * reader is one of the top-level data structures, 
+    * it has a pointer to the log file descriptor, 
+    * and pointers to all the registered handlers
+    */
+  struct reader {
+      int              log;            /* log file descriptor */ 
+      struct list_head *handler_array; /* handler array is an array of lists, 
+                                          or to be specific it's an array of list_heads;
+                                          we allocate it to be the size of max(event_id) */
+  }
+
+  /* 
+   * handler is a structure which is a hadnler probe "object" -- it implements the 
+   * probe interface -- init, process_event, finalize, has event id of course, and 
+   * name for readability
+   */
+  struct handler {
+      char     name[32];
+      int      event_id;
+      void     *priv;
+
+      struct list_head   handler_list;          /* handler list  */
+  
+      int (*init)(struct handler *handler);
+      int (*process_event)(struct handler *handler, struct event *event);
+      int (*finalize)(struct handler *handler);      
+  }
+
+  void call_handlers(struct reader *reader, struct event *event) {
+      struct handler *handler; 
+      struct list_head *head = reader->handler_array[event->id];
+
+      /* if no handlers registered, return right away */
+      if (list_empty(head))
+          return; 
+
+      /* walk through the list of registered handlers */
+      list_for_each_entry_safe(handler, head, handler_list) {
+          handler->process_event(handler->priv, event); 
+      }
+
+      return;
+  }
+
+The function, which registers handlers looks like this -- basically it just adds a new handler 
+structure to the list of handlers
+
+int register_handler(struct handler *handler_array, event_t event, struct handler *handler) {
+    
+    /* Add a new handler to the tail of the handler list */
+    list_add_tail(&handler->handler_list, &handler_array[event]);
+    return 0;
+};
+
+Using the reader library (count number of traps example)
+--------------------------------------------------------
+
+All the code above is supposedly a part of a "reader" library. The users of 
+this library, who develop analysis algorithms, use the library in the following way: 
+
+The handlers are declared like this (assume we count the number of traps): 
+
+int trap_init(struct handler *handler) {
+   int *counter = (int*)handler->priv;
+   
+   (*counter) = 0;
+
+   return 0;
+}
+
+int trap_finalize(struct handler *handler) {
+   int *counter = (int*)handler->priv;
+   
+   printf("Overall we've seen %d traps\n", *counter);
+   return 0;
+}
+
+int trap_event(struct handler *handler, struct event *event) {
+   int *counter = (int*)handler->priv;
+
+   (*counter)++;
+
+   return 0;
+}
+
+The analysis code looks declares, and registers the handler in the following way: 
+
+int trap_counter;
+
+static struct handler trap_handler = {
+    .name = "trap",
+    .init = trap_init,
+    .priv = (void *)&trap_counter;
+    .process_event = trap_event,
+    .finalize = trap_finalize,
+};
+
+int main(void) {
+
+   /* init reader */
+   reader_init(log_file_name);
+
+   /* register all handlers */
+   register_handler(reader->handlers, EVENT_TRAP, &trap_handler);
+
+   /* run the reader */
+   reader_loop(reader);
+
+   return 0;
+}
