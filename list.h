@@ -25,9 +25,9 @@
  * using the generic single-entry routines.
  */
 
-struct list_head {
+typedef struct list_head {
 	struct list_head *next, *prev;
-};
+} list_head;
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 

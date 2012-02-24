@@ -78,7 +78,7 @@ registered for this event. It's something like this:
 The function, which registers handlers looks like this -- basically it just adds a new handler 
 structure to the list of handlers
 
-int register_handler(struct handler *handler_array, event_t event, struct handler *handler) {
+int register_handler(struct list_head *handler_array, event_t event, struct handler *handler) {
     
     /* Add a new handler to the tail of the handler list */
     list_add_tail(&handler->handler_list, &handler_array[event]);
@@ -122,6 +122,7 @@ int trap_counter;
 
 static struct handler trap_handler = {
     .name = "trap",
+    .event_id = TRAP,
     .init = trap_init,
     .priv = (void *)&trap_counter;
     .process_event = trap_event,
