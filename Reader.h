@@ -9,4 +9,7 @@ typedef struct Reader
 	EventHandler	*handler_array;
 }
 
+void reader_init(Reader *reader, const char *filename);
+void reader_exit(Reader *reader);
+int reader_loop(Reader *reader);
 #endif

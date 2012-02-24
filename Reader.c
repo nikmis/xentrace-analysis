@@ -39,4 +39,21 @@ void reader_exit(Reader *reader)
 
 int reader_loop(Reader *reader)
 {
+	int ret = 0;
+	Event event;
 
+	evh_call_initializers(reader);
+
+	do
+	{
+		ret = parse_next_event(&event, reader->fp);
+		if (ret == FAIL)
+			break;
+		evh_call_handlers(reader, &event);
+
+	} while(!feof(reader->fp));
+
+	evh_call_finalizers(reader);
+	
+	return SUCCESS;
+}
