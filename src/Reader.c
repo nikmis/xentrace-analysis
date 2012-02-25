@@ -1,4 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/errno.h>
 #include "EventHandler.h"
 #include "Macros.h"
 #include "Reader.h"
@@ -6,6 +9,7 @@
 
 void reader_init(Reader *reader, const char *filename)
 {
+	int i = 0;
 	if((reader->fp = fopen(filename, "rb")) == NULL)
 	{
 		strerror(errno);
@@ -31,7 +35,6 @@ void reader_init(Reader *reader, const char *filename)
 
 void reader_exit(Reader *reader)
 {
-	int i = 0;
 	fclose(reader->fp);
 
 	free(reader->handler_array);

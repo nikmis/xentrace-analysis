@@ -1,12 +1,14 @@
 #include <stdio.h>
 
-#include "Reader.h"
+#include "Event.h"
+#include "Macros.h"
 #include "EventHandler.h"
+#include "Reader.h"
 
-void evh_call_handlers(Reader *reader, Event *ev)
+void evh_call_handlers(struct Reader *reader, Event *ev)
 {
 	int i = 0, index = -1;
-	EventHandler	*ev_handler;
+	EventHandler	*ev_handler, *temp;
 	list_head 	*head;
 
 	for(i = 0; i < MAX_EVENTS; i++)
@@ -21,10 +23,12 @@ void evh_call_handlers(Reader *reader, Event *ev)
 
 	if(index == -1)
 	{
+#ifdef DEBUG
 		fprintf(stderr, "%s:%d : Event %d not found\n",
 				__FILE__,
 				__LINE__,
 				ev->event_id);
+#endif
 		return;
 	}
 
@@ -39,7 +43,7 @@ void evh_call_handlers(Reader *reader, Event *ev)
 		return;
 	}
 
-	list_for_each_entry_safe(ev_handler, head, handler_list)
+	list_for_each_entry_safe(ev_handler, temp, head, handler_list)
 	{
 		ev_handler->process_event(ev_handler, ev);
 	}
@@ -47,15 +51,15 @@ void evh_call_handlers(Reader *reader, Event *ev)
 	return;
 }
 
-void evh_call_initializers(Reader *reader)
+void evh_call_initializers(struct Reader *reader)
 {
 	int i = 0, index = -1;
-	EventHandler	*ev_handler;
+	EventHandler	*ev_handler, *temp;
 	list_head 	*head;
 
 	for(i = 0; i < MAX_EVENTS; i++)
 	{
-		if(reader->handler_array[i].event_id != NULL)
+		if(reader->handler_array[i].event_id != 0)
 		{
 			index = i;
 			head = &(reader->handler_array[index].handler_list);
@@ -70,9 +74,9 @@ void evh_call_initializers(Reader *reader)
 				continue;
 			}
 
-			list_for_each_entry_safe(ev_handler, head, handler_list)
+			list_for_each_entry_safe(ev_handler, temp, head, handler_list)
 			{
-				ev_handler->init(ev_handler, ev);
+				ev_handler->init(ev_handler);
 			}
 		}
 		else /* Null indicates no more handlers */
@@ -80,15 +84,15 @@ void evh_call_initializers(Reader *reader)
 	}
 }
 
-void evh_call_finalizers(Reader *reader)
+void evh_call_finalizers(struct Reader *reader)
 {
 	int i = 0, index = -1;
-	EventHandler	*ev_handler;
+	EventHandler	*ev_handler, *temp;
 	list_head 	*head;
 
 	for(i = 0; i < MAX_EVENTS; i++)
 	{
-		if(reader->handler_array[i].event_id != NULL)
+		if(reader->handler_array[i].event_id != 0)
 		{
 			index = i;
 			head = &(reader->handler_array[index].handler_list);
@@ -103,9 +107,9 @@ void evh_call_finalizers(Reader *reader)
 				continue;
 			}
 
-			list_for_each_entry_safe(ev_handler, head, handler_list)
+			list_for_each_entry_safe(ev_handler, temp, head, handler_list)
 			{
-				ev_handler->finalize(ev_handler, ev);
+				ev_handler->finalize(ev_handler);
 			}
 		}
 		else /* Null indicates no more handlers */
@@ -113,7 +117,7 @@ void evh_call_finalizers(Reader *reader)
 	}
 }
 
-void evh_register_handler(Reader *reader, EventHandler *ev_handler)
+void evh_register_handler(struct Reader *reader, EventHandler *ev_handler)
 {
 	int i = 0, index = -1;
 	
@@ -127,7 +131,7 @@ void evh_register_handler(Reader *reader, EventHandler *ev_handler)
 		/* ptr exists.
 		   check for event. 
 		 */
-		if(reader->handler_array[i].event_id != NULL)
+		if(reader->handler_array[i].event_id != 0)
 		{
 			if(reader->handler_array[i].event_id == ev_handler->event_id)
 			{

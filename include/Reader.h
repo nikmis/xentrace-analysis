@@ -6,8 +6,8 @@
 typedef struct Reader
 {
 	FILE 		*fp;
-	EventHandler	*handler_array;
-}
+	struct EventHandler	*handler_array;
+} Reader;
 
 void reader_init(Reader *reader, const char *filename);
 void reader_exit(Reader *reader);

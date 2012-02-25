@@ -1,6 +1,9 @@
 #include <stdio.h>
-
-#include "macros.h"
+#include <string.h>
+/*
+#include "../include/Macros.h"
+ */
+#include "Macros.h"
 #include "Event.h"
 
 

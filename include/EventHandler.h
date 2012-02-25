@@ -13,15 +13,15 @@ typedef struct EventHandler
 
 	list_head	handler_list;
 
-	int	(*init)(struct EventHandler *ev_handler, Event *ev);
+	int	(*init)(struct EventHandler *ev_handler);
 	int	(*process_event)(struct EventHandler *ev_handler, Event *ev);
-	int	(*finalize)(struct EventHandler *ev_handler, Event *ev);
+	int	(*finalize)(struct EventHandler *ev_handler);
 } EventHandler;
 
-void evh_call_handlers(Reader *reader, Event *ev);
-void evh_call_initializers(Reader *reader);
-void evh_call_finalizers(Reader *reader);
-void evh_register_handler(Reader *reader, EventHandler *ev_handler);
+void evh_call_handlers(struct Reader *reader, Event *ev);
+void evh_call_initializers(struct Reader *reader);
+void evh_call_finalizers(struct Reader *reader);
+void evh_register_handler(struct Reader *reader, EventHandler *ev_handler);
 
 #endif
 
