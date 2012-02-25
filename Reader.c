@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "EventHandler.h"
 #include "Macros.h"
 #include "Reader.h"
 

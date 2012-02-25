@@ -169,3 +169,16 @@ void clear_event(Event *ev)
 	ev->tsc = 0;
 	memset(ev->data, 0, MAX_EV_DATA);
 }
+
+/* Description:	Helper function
+   Checks null pointers.
+ */
+int check_null(void *ev, void *fp)
+{
+	if((ev == NULL) || (fp == NULL))
+	{
+		return FAIL;
+	}
+	else
+		return SUCCESS;
+}

@@ -6,16 +6,6 @@
 #include "macros.h"
 #include "Event.h"
 
-/* Struct for storing SWITCH_INFPREV related data */
-typedef struct
-{
-	unsigned int dom_id;
-	unsigned long long runtime;
-} DomTime;
-
-/* Helper functions */
-int check_null(void *, void *);
-
 
 int main(int argc, char *argv[])
 {
@@ -47,15 +37,3 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-/* Description:	Helper function
-   Checks null pointers.
- */
-int check_null(void *ev, void *fp)
-{
-	if((ev == NULL) || (fp == NULL))
-	{
-		return FAIL;
-	}
-	else
-		return SUCCESS;
-}

@@ -11,6 +11,9 @@ typedef struct
 	unsigned int data[MAX_EV_DATA];
 } Event;
 
+/* Helper functions */
+int check_null(void *, void *);
+
 /* Generic event parse functions */
 int parse_event(Event *, FILE *, unsigned int);
 int parse_next_event(Event *, FILE *);
