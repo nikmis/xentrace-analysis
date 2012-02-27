@@ -15,8 +15,8 @@ vpath %.c ./src
 vpath %.c ./src/handlers
 
 all: main.c $(OBJS) Macros.h Externals.h
-	$(CC) $(INC) $< $(wildcard *.o) -o test/a.out	
-	rm -f Event.o EventHandler.o Reader.o $(wildcard *.o)
+	$(CC) $(INC) $<  *.o -o test/a.out	
+	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
 	$(CC) $(INC) -c $< -o $@

@@ -46,6 +46,8 @@ int reader_loop(Reader *reader)
 	int ret = 0;
 	Event event;
 
+	clear_event(&event);
+
 	evh_call_initializers(reader);
 
 	do
