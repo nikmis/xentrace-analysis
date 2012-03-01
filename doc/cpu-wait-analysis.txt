@@ -1,0 +1,64 @@
+
+Definition of wait
+------------------
+
+vcpu_1 -------                           --------- 
+             |                           |  
+vcpu_2       |      --------------       |
+             |      |            |       |
+xen          |------|            |-------|
+
+                           ^
+                           | 
+
+     t_0    t_1    t_2    t_3   t_4     t_5
+
+The figure above shows a scheduling history of two virtual CPUs on a single
+physical CPU.
+
+The figure starts in a state, in which at the time t_0, VCPU_1 is running.
+
+We assume that VCPU_1 becomes idle at the moment t_1, and volunteerely donates
+its time-slice (yields) to Xen by invoking a special hypercall. 
+
+At the time t_1, execution is transfered to Xen, as a result of the yield
+invocation. Xen performs a context switch (t_1 - t_2), and gives CPU to VCPU_2.
+
+At the time t_2, despite the fact that VCPU_1 is not running, it's still not in
+the waiting state, since it's natural to assume that it's still idle.
+
+At time t_3, an event, like an event channel notification, arrives to the
+physical CPU, which has to be processed by VCPU_1. At this point, VCPU_1 enters
+the wait state -- it's waiting on the physical CPU, to start processing an
+event. VCPU_1 remains in the waiting state until it gets scheduled by Xen, at
+time t_5. At this time, it can finally process the event.  According to our
+definition, the wait time in this case is:  
+
+   wait_time = t_5 - t_3
+
+
+Analysis
+--------
+
+Wait time analysis is aimed to compute the total wait time for each VCPU
+over its run.
+
+It may happen that no event arrives while VCPU is preempted, and in this case
+the wait time is zero.
+
+It may also happen, that VPCU doesn't yield it's slice volunteerely. In this
+case it's preempted, and the wait time is equal to t_5 - t_1, even if no events
+arrive at this period of time. 
+
+Some comments
+-------------
+
+At some point, I was optimistically claiming that the wait time is somehow
+caused by the fact that VCPU gets blocked. Rob was sceptical about this, and he
+was right. Although, VCPUs can get blocked under certain conditions (e.g.
+paused), I don't think it's an often event. I guess, the definition of wait, as
+I give it above, makes the most sense, but correct me if I'm wrong. 
+
+I think we can define "packet wait" in a similar way -- the amount of time
+domain spends off-line while the packet is ready for processing. 
+
