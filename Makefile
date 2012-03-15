@@ -1,4 +1,4 @@
-CC=clang -Wall
+CC=gcc -Wall
 INC=-I./include -I./include/handlers
 
 HDLR_SRC=$(wildcard src/handlers/*.c)
