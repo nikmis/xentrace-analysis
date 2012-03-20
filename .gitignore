@@ -2,4 +2,5 @@
 *.out
 *.swp
 cscope.files
+tags
 test/
