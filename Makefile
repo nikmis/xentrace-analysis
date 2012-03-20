@@ -1,4 +1,4 @@
-CC=gcc -Wall
+CC=gcc -Wall -m32
 INC=-I./include -I./include/handlers
 
 HDLR_SRC=$(wildcard src/handlers/*.c)
