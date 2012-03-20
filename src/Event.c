@@ -37,13 +37,50 @@ int parse_event(Event *ev, FILE *fp, unsigned int ev_id)
 	return FAIL;
 }
 
+/* This structure represents a single trace buffer record. */
+struct t_rec {
+    unsigned long long cycles;          /* cycle counter timestamp */
+    unsigned long event;           /* event ID                */
+    unsigned long data[5];    /* event data items        */
+};
+
 /* Description:	Generic event parse function
    Parses the next event in log file. 
    Uses modular parse functions
  */
 int parse_next_event(Event *ev, FILE *fp)
 {
-	if(parse_event_id(ev, fp) == FAIL)
+    int read;
+    unsigned int cpu;
+    struct t_rec rec;
+
+    read = fread(&cpu, sizeof(cpu), 1, fp);
+    if (read == 0) {
+        fprintf(stderr, "failed to read cpu id\n");
+        return FAIL;
+    }
+
+    read = fread(&rec, sizeof(rec), 1, fp);
+    if (read == 0) {
+        fprintf(stderr, "failed to read rec id\n");
+        return FAIL;
+    }
+
+    printf("cpu:%u, cycles:%llu, event:%lu, data0:%lu, data1:%lu, data2:%lu, data3:%lu, data4:%lu\n", 
+           cpu, rec.cycles, rec.event, rec.data[0], rec.data[1], rec.data[2], rec.data[3], rec.data[4]);
+
+    ev->event_id = rec.event;
+    ev->tsc = rec.cycles;
+    ev->n_data = 5;
+    ev->data[0] = rec.data[0];
+    ev->data[1] = rec.data[1];
+    ev->data[2] = rec.data[2];
+    ev->data[3] = rec.data[3];
+    ev->data[4] = rec.data[4];
+
+
+/*
+    if(parse_event_id(ev, fp) == FAIL)
 	{
 		fprintf(stderr, "%s:%d: parse_event_id returned FAIL\n", __FILE__, __LINE__);
 		return FAIL;
@@ -60,7 +97,7 @@ int parse_next_event(Event *ev, FILE *fp)
 		fprintf(stderr, "%s:%d: parse_event_data returned FAIL\n", __FILE__, __LINE__);
 		return FAIL;
 	}
-
+*/
 	return SUCCESS;
 }
 
