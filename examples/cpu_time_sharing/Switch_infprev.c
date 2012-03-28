@@ -5,6 +5,7 @@
 #include "Event.h"
 #include "EventHandler.h"
 #include "Macros.h"
+#include "Trace.h"
 #include "Switch_infprev.h"
 
 /* Extern Varaible to be used by Handler */
@@ -43,7 +44,7 @@ int switch_infprev_finalize(EventHandler *handler)
 
 	while((i < dat->num_of_doms) && (i < MAX_DOMS))
 	{
-		printf("Dom ID = %d Cpu_Time = %lld Total_Time = %lld Cpu_Time_Share = %.2f %%\n", 
+		printf("Dom ID = %5d : Cpu_Time = %20lld(cycles) : Total_Time = %20lld(cycles) : Cpu_Time_Share = %3.2f %%\n", 
 				dat->dt[i].dom_id, 
 				dat->dt[i].runtime, 
 				dat->total_time, 
@@ -106,7 +107,7 @@ unsigned short add_time_to_list(DomTime *dt, Event *ev)
 /* Extern Event handler struct */
 struct EventHandler switch_infprev_handler = {
 	.name = "switch_infprev",
-	.event_id = SWITCH_INFPREV,
+	.event_id = TRC_SCHED_SWITCH_INFPREV,
 	.init = switch_infprev_init,
 	.data = (void *)&dom_all_times,
 	.process_event = switch_infprev_event,

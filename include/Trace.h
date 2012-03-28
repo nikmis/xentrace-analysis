@@ -150,26 +150,26 @@
 #define TRC_HVM_HLT             (TRC_HVM_HANDLER + 0x13)
 #define TRC_HVM_INVLPG          (TRC_HVM_HANDLER + 0x14)
 
-/* This structure represents a single trace buffer record. */
-struct t_rec {
-    uint64_t cycles;          /* cycle counter timestamp */
-    uint32_t event;           /* event ID                */
-#ifdef CONFIG_TIMETRAVEL_XENTRACE
-    unsigned long long data[5];    /* event data items        */
-#else 
-    unsigned long data[5];    /* event data items        */
-#endif 
-};
-
-/*
- * This structure contains the metadata for a single trace buffer.  The head
- * field, indexes into an array of struct t_rec's.
- */
-struct t_buf {
-    uint32_t cons;      /* Next item to be consumed by control tools. */
-    uint32_t prod;      /* Next item to be produced by Xen.           */
-    /* 'nr_recs' records follow immediately after the meta-data header.    */
-};
+///* This structure represents a single trace buffer record. */
+//struct t_rec {
+//    uint64_t cycles;          /* cycle counter timestamp */
+//    uint32_t event;           /* event ID                */
+//#ifdef CONFIG_TIMETRAVEL_XENTRACE
+//    unsigned long long data[5];    /* event data items        */
+//#else 
+//    unsigned long data[5];    /* event data items        */
+//#endif 
+//};
+//
+///*
+// * This structure contains the metadata for a single trace buffer.  The head
+// * field, indexes into an array of struct t_rec's.
+// */
+//struct t_buf {
+//    uint32_t cons;      /* Next item to be consumed by control tools. */
+//    uint32_t prod;      /* Next item to be produced by Xen.           */
+//    /* 'nr_recs' records follow immediately after the meta-data header.    */
+//};
 
 #endif /* __XEN_PUBLIC_TRACE_H__ */
 

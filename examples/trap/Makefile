@@ -11,20 +11,20 @@ vpath %.h .
 vpath %.c ../../src
 vpath %.c .
 
-all: main.c $(OBJS) Macros.h Externals.h
+all: main.c $(OBJS) Macros.h Trace.h Externals.h
 	$(CC) $(INC) $<  *.o -o ../../test/Trap.out	
 	rm -f *.o
 
-Event.o: Event.c Event.h Macros.h
+Event.o: Event.c Event.h Macros.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
+EventHandler.o: EventHandler.c EventHandler.h Macros.h Trace.h list.h
 	$(CC) $(INC) -c $< -o $@
 
-Reader.o: Reader.c Reader.h Macros.h
+Reader.o: Reader.c Reader.h Macros.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Trap.o: Trap.h Trap.c Macros.h Externals.h
+Trap.o: Trap.h Trap.c Macros.h Trace.h Externals.h
 	$(CC) $(INC) -c Trap.c
 
 clean: 

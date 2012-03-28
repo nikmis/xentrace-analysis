@@ -5,6 +5,7 @@
 
 /* Common Headers */
 #include "Macros.h"
+#include "Trace.h"
 #include "Event.h"
 #include "EventHandler.h"
 #include "Reader.h"

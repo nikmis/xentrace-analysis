@@ -10,4 +10,7 @@
 #define MAX_DOMS	25
 #define MAX_EVENTS	200
 
+/* Event Ids not present in xen_tt */
+#define TRAP 		0x0020f003
+
 #endif
