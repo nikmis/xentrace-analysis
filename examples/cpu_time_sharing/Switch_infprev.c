@@ -54,11 +54,19 @@ int switch_infprev_event(EventHandler *handler, Event *event)
 	dat->num_of_doms = add_time_to_list(dat->dt, event);
 	dat->total_time += event->data[1];
 
-	/* Sanity check: TSC timestampts can't be two times further apart */
+	/* Sanity check: TSC timestamps can't be two times further apart */
 	if((double)event->data[1] < distance_in_ns * 0.5) {
-		printf("TSC anomaly, curr TSC:%llu, distance from TSC:%ld, distance from event data:%llu\n",
+		printf("TSC anomaly, curr TSC:%llu, distance from TSC:%ld, distance from event data:%lld\n",
 		       event->tsc, distance_in_ns, event->data[1]);
 	};
+	
+	/* Sanity check 2: TSC timestamps can't be more than 500ms apart */
+	if((((double)event->data[1])*1000000 > 500) || 
+	    (distance_in_ns * 1000000 > 500)) {
+		printf("TSC anomaly, event's can't be > 500ms apart curr TSC:%llu, distance from TSC:%ld, distance from event data:%lld\n",
+		       event->tsc, distance_in_ns, event->data[1]);
+	};
+
 
 	//total_tsc_time = ((double)end_of_log - (double)start_of_log) * 0.41;
 
