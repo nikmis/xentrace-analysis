@@ -61,8 +61,8 @@ int switch_infprev_event(EventHandler *handler, Event *event)
 	};
 	
 	/* Sanity check 2: TSC timestamps can't be more than 500ms apart */
-	if((((double)event->data[1])*1000000 > 500) || 
-	    (distance_in_ns * 1000000 > 500)) {
+	if((((double)event->data[1])/1000000 > 500) || 
+	    (distance_in_ns / 1000000 > 500)) {
 		printf("TSC anomaly, event's can't be > 500ms apart curr TSC:%llu, distance from TSC:%ld, distance from event data:%lld\n",
 		       event->tsc, distance_in_ns, event->data[1]);
 	};
