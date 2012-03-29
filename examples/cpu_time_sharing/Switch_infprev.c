@@ -11,6 +11,11 @@
 /* Extern Varaible to be used by Handler */
 DomAllTimes dom_all_times;
 
+int start_of_log_flag = 1;
+
+unsigned long long start_of_log, end_of_log;
+
+
 /* Init handler */
 int switch_infprev_init(EventHandler *handler)
 {
@@ -29,9 +34,38 @@ int switch_infprev_init(EventHandler *handler)
 int switch_infprev_event(EventHandler *handler, Event *event)
 {
 	DomAllTimes *dat = (DomAllTimes *)handler->data;
+	double distance_in_tsc, distance_in_ns;
 
+	if(start_of_log_flag) {
+		start_of_log_flag = 0;
+		start_of_log = event->tsc;
+		end_of_log = event->tsc;
+	};
+
+
+	/* Compute the distance between two consecutive infprev events, 
+	 * we need it to do a sanity check and detect anomalies */
+
+	distance_in_tsc = ((double)event->tsc - (double)end_of_log);
+	distance_in_ns = distance_in_tsc /((double)2.4);
+
+	end_of_log = event->tsc;
+	
 	dat->num_of_doms = add_time_to_list(dat->dt, event);
 	dat->total_time += event->data[1];
+
+	/* Sanity check: TSC timestampts can't be two times further apart */
+	if((double)event->data[1] < distance_in_ns * 0.5) {
+		printf("TSC anomaly, curr TSC:%llu, distance from TSC:%ld, distance from event data:%llu\n",
+		       event->tsc, distance_in_ns, event->data[1]);
+	};
+
+	//total_tsc_time = ((double)end_of_log - (double)start_of_log) * 0.41;
+
+        //if(total_tsc_time > 1000000000) {
+	//	switch_infprev_finalize(handler);
+	//	start_of_log_flag = 1;
+	//};
 
 	return 0;
 }
@@ -41,17 +75,41 @@ int switch_infprev_finalize(EventHandler *handler)
 {
 	DomAllTimes *dat = (DomAllTimes *)handler->data;
 	unsigned short i = 0;
+	double total_tsc_time_ns, total_tsc_time_cycles;
+        
+	total_tsc_time_cycles = ((double)end_of_log - (double)start_of_log);
+
+	total_tsc_time_ns = total_tsc_time_cycles * ((double)1/2.4);
+
+	printf("TSC: session start:%llu(cycles), end:%llu(cycles), length:%llu(cycles), %lf (ns)\n", 
+			start_of_log, end_of_log, total_tsc_time_cycles, total_tsc_time_ns);
+
 
 	while((i < dat->num_of_doms) && (i < MAX_DOMS))
 	{
-		printf("Dom ID = %5d : Cpu_Time = %20lld(cycles) : Total_Time = %20lld(cycles) : Cpu_Time_Share = %3.2f %%\n", 
+		printf("Nik: Dom ID = %5d : Cpu_Time = %20lld(ns) : Total_Time = %20lld(ns) : Cpu_Time_Share = %3.2f %%\n", 
 				dat->dt[i].dom_id, 
 				dat->dt[i].runtime, 
 				dat->total_time, 
 				((float)dat->dt[i].runtime/dat->total_time)*100);
+                
+		
+	       		
+		printf("TSC: Dom ID = %5d : Cpu_Time = %20lld(ns) : Total_Time = %lf(ns) : Cpu_Time_Share = %3.2f %%\n", 
+				dat->dt[i].dom_id, 
+				dat->dt[i].runtime, 
+			        total_tsc_time_ns,
+				((double)dat->dt[i].runtime/total_tsc_time_ns)*100);
+
+                //if(start_of_log_flag) {
+		//      dat->dt[i].runtime = 0;
+	        //}
+
+
 		++i;
 	}
 
+	
 	return 0;
 }
 
