@@ -44,10 +44,10 @@ int switch_infprev_finalize(EventHandler *handler)
 
 	while((i < dat->num_of_doms) && (i < MAX_DOMS))
 	{
-		printf("Dom ID = %5d : Cpu_Time = %20lld(cycles) : Total_Time = %20lld(cycles) : Cpu_Time_Share = %3.2f %%\n", 
+		printf("Dom ID = %5d : Cpu_Time = %15.4f(s) : Total_Time = %15.4f(s) : Cpu_Time_Share = %5.2f %%\n", 
 				dat->dt[i].dom_id, 
-				dat->dt[i].runtime, 
-				dat->total_time, 
+				(float)dat->dt[i].runtime/1000000000, 
+				(float)dat->total_time/1000000000, 
 				((float)dat->dt[i].runtime/dat->total_time)*100);
 		++i;
 	}
