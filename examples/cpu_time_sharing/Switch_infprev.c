@@ -34,7 +34,6 @@ int switch_infprev_init(EventHandler *handler)
 int switch_infprev_event(EventHandler *handler, Event *event)
 {
 	DomAllTimes *dat = (DomAllTimes *)handler->data;
-	double distance_in_tsc, distance_in_ns;
 
 	if(start_of_log_flag) {
 		start_of_log_flag = 0;
@@ -43,41 +42,45 @@ int switch_infprev_event(EventHandler *handler, Event *event)
 	};
 
 
-	/* Compute the distance between two consecutive infprev events, 
-	 * we need it to do a sanity check and detect anomalies */
-
-	distance_in_tsc = ((double)event->tsc - (double)end_of_log);
-	distance_in_ns = distance_in_tsc /((double)2.4);
-
-	end_of_log = event->tsc;
-	
 	dat->num_of_doms = add_time_to_list(dat->dt, event);
 	dat->total_time += event->data[1];
 
-	/* Sanity check: TSC timestamps can't be two times further apart */
-	if((double)event->data[1] < distance_in_ns * 0.5) {
-		printf("TSC anomaly, curr TSC:%llu, distance from TSC:%lf, distance from event data:%u\n",
-		       event->tsc, distance_in_ns, event->data[1]);
-	};
-	
-	/* Sanity check 2: TSC timestamps can't be more than 500ms apart */
-	if((((double)event->data[1])/1000000 > 500) || 
-	    (distance_in_ns / 1000000 > 500)) {
-		printf("TSC anomaly, event's can't be > 500ms apart curr TSC:%llu, distance from TSC:%lf, distance from event data:%u\n",
-		       event->tsc, distance_in_ns, event->data[1]);
-	};
+	sanity_check(event);
 
-
-	//total_tsc_time = ((double)end_of_log - (double)start_of_log) * 0.41;
-
-        //if(total_tsc_time > 1000000000) {
-	//	switch_infprev_finalize(handler);
-	//	start_of_log_flag = 1;
-	//};
+	end_of_log = event->tsc;
 
 	return 0;
 }
 
+/* Sanity Check for TSC and runtime */
+void sanity_check(Event *ev)
+{
+	double distance_in_tsc, distance_in_ns;
+
+
+	/* Compute the distance between two consecutive infprev events, 
+	 * we need it to do a sanity check and detect anomalies */
+
+	distance_in_tsc = ((double)ev->tsc - (double)end_of_log);
+	distance_in_ns = distance_in_tsc /((double)CPU_FREQ);
+
+
+	/* Sanity check: TSC timestamps can't be two times further apart */
+	if((double)ev->data[1] < distance_in_ns * 0.5) 
+	{
+		fprintf(stderr, "TSC anomaly: Curr TSC  = %20llu : Distance from TSC = %15.6lf (s) : Distance from event data = %15.6f\n",
+		       ev->tsc, distance_in_ns/1000000000, (float)ev->data[1]/1000000000);
+	};
+	
+	/* Sanity check 2: TSC timestamps can't be more than 500ms apart */
+	if((((double)ev->data[1])/1000000 > 500) || 
+	    (distance_in_ns / 1000000 > 500)) {
+		fprintf(stderr, "TSC anomaly, event's can't be > 500ms apart : Curr TSC = %20llu : Distance from TSC = %15.6lf : Distance from event data = %15.6f\n",
+		       ev->tsc, distance_in_ns/1000000000, (float)ev->data[1]/1000000000);
+	};
+
+}
+	
 /* Call finalizers to display processed event data */
 int switch_infprev_finalize(EventHandler *handler)
 {
@@ -95,7 +98,7 @@ int switch_infprev_finalize(EventHandler *handler)
 
 	while((i < dat->num_of_doms) && (i < MAX_DOMS))
 	{
-		printf("Dom ID = %5d : Cpu_Time = %15.4f(s) : Total_Time = %15.4f(s) : Cpu_Time_Share = %5.2f %%\n", 
+		printf("RUN: Dom ID = %5d : Cpu_Time = %15.4f(s) : Total_Time = %15.4f(s) : Cpu_Time_Share = %5.2f %%\n", 
 				dat->dt[i].dom_id, 
 				(float)dat->dt[i].runtime/1000000000, 
 				(float)dat->total_time/1000000000, 
@@ -103,10 +106,10 @@ int switch_infprev_finalize(EventHandler *handler)
                 
 		
 	       		
-		printf("TSC: Dom ID = %5d : Cpu_Time = %20lld(ns) : Total_Time = %lf(ns) : Cpu_Time_Share = %3.2f %%\n", 
+		printf("TSC: Dom ID = %5d : Cpu_Time = %15.4f(s) : Total_Time = %15.4lf(s) : Cpu_Time_Share = %3.2f %%\n", 
 				dat->dt[i].dom_id, 
-				dat->dt[i].runtime, 
-			        total_tsc_time_ns,
+				(float)dat->dt[i].runtime/1000000000, 
+			        total_tsc_time_ns/1000000000,
 				((double)dat->dt[i].runtime/total_tsc_time_ns)*100);
 
                 //if(start_of_log_flag) {

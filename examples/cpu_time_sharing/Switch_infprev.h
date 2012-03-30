@@ -20,7 +20,8 @@ int switch_infprev_init(EventHandler *handler);
 int switch_infprev_event(EventHandler *handler, Event *event);
 int switch_infprev_finalize(EventHandler *handler);
 
-/* Event specfic parse functions */
+/* Event Handler Helper functions */
 unsigned short add_time_to_list(DomTime *, Event *);
+void sanity_check(Event *ev);
 
 #endif
