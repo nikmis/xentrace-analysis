@@ -68,14 +68,14 @@ void sanity_check(Event *ev)
 	/* Sanity check: TSC timestamps can't be two times further apart */
 	if((double)ev->data[1] < distance_in_ns * 0.5) 
 	{
-		fprintf(stderr, "TSC anomaly: Curr TSC  = %20llu : Distance from TSC = %15.6lf (s) : Distance from event data = %15.6f\n",
+		fprintf(stderr, "TSC anomaly: Curr TSC  = %20llu : Difference in TSC = %15.6lf (s) : Difference in runtime = %15.6f (s)\n",
 		       ev->tsc, distance_in_ns/1000000000, (float)ev->data[1]/1000000000);
 	};
 	
 	/* Sanity check 2: TSC timestamps can't be more than 500ms apart */
 	if((((double)ev->data[1])/1000000 > 500) || 
 	    (distance_in_ns / 1000000 > 500)) {
-		fprintf(stderr, "TSC anomaly, event's can't be > 500ms apart : Curr TSC = %20llu : Distance from TSC = %15.6lf : Distance from event data = %15.6f\n",
+		fprintf(stderr, "TSC anomaly, event's can't be > 500ms apart : Curr TSC = %20llu : Difference in TSC = %15.6lf (s) : Difference in runtime = %15.6f (s)\n",
 		       ev->tsc, distance_in_ns/1000000000, (float)ev->data[1]/1000000000);
 	};
 
@@ -88,14 +88,6 @@ int switch_infprev_finalize(EventHandler *handler)
 	unsigned short i = 0;
 	double total_tsc_time_ns, total_tsc_time_cycles;
         
-	total_tsc_time_cycles = ((double)end_of_log - (double)start_of_log);
-
-	total_tsc_time_ns = total_tsc_time_cycles * ((double)1/2.4);
-
-	printf("TSC: session start:%llu(cycles), end:%llu(cycles), length:%lf(cycles), %lf (ns)\n", 
-			start_of_log, end_of_log, total_tsc_time_cycles, total_tsc_time_ns);
-
-
 	while((i < dat->num_of_doms) && (i < MAX_DOMS))
 	{
 		printf("RUN: Dom ID = %5d : Cpu_Time = %15.4f(s) : Total_Time = %15.4f(s) : Cpu_Time_Share = %5.2f %%\n", 
@@ -103,24 +95,25 @@ int switch_infprev_finalize(EventHandler *handler)
 				(float)dat->dt[i].runtime/1000000000, 
 				(float)dat->total_time/1000000000, 
 				((float)dat->dt[i].runtime/dat->total_time)*100);
-                
-		
-	       		
+		++i;
+	}
+
+	i = 0;
+	total_tsc_time_cycles = ((double)end_of_log - (double)start_of_log);
+	total_tsc_time_ns = total_tsc_time_cycles * ((double)1/2.4);
+
+	printf("TSC: session start:%llu(cycles), end:%llu(cycles), length:%lf(cycles), %lf (ns)\n", 
+			start_of_log, end_of_log, total_tsc_time_cycles, total_tsc_time_ns);
+	while((i < dat->num_of_doms) && (i < MAX_DOMS))
+	{
 		printf("TSC: Dom ID = %5d : Cpu_Time = %15.4f(s) : Total_Time = %15.4lf(s) : Cpu_Time_Share = %3.2f %%\n", 
 				dat->dt[i].dom_id, 
 				(float)dat->dt[i].runtime/1000000000, 
 			        total_tsc_time_ns/1000000000,
 				((double)dat->dt[i].runtime/total_tsc_time_ns)*100);
-
-                //if(start_of_log_flag) {
-		//      dat->dt[i].runtime = 0;
-	        //}
-
-
+	
 		++i;
 	}
-
-	
 	return 0;
 }
 
