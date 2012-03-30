@@ -56,14 +56,14 @@ int switch_infprev_event(EventHandler *handler, Event *event)
 
 	/* Sanity check: TSC timestamps can't be two times further apart */
 	if((double)event->data[1] < distance_in_ns * 0.5) {
-		printf("TSC anomaly, curr TSC:%llu, distance from TSC:%ld, distance from event data:%lld\n",
+		printf("TSC anomaly, curr TSC:%llu, distance from TSC:%lf, distance from event data:%u\n",
 		       event->tsc, distance_in_ns, event->data[1]);
 	};
 	
 	/* Sanity check 2: TSC timestamps can't be more than 500ms apart */
 	if((((double)event->data[1])/1000000 > 500) || 
 	    (distance_in_ns / 1000000 > 500)) {
-		printf("TSC anomaly, event's can't be > 500ms apart curr TSC:%llu, distance from TSC:%ld, distance from event data:%lld\n",
+		printf("TSC anomaly, event's can't be > 500ms apart curr TSC:%llu, distance from TSC:%lf, distance from event data:%u\n",
 		       event->tsc, distance_in_ns, event->data[1]);
 	};
 
@@ -89,7 +89,7 @@ int switch_infprev_finalize(EventHandler *handler)
 
 	total_tsc_time_ns = total_tsc_time_cycles * ((double)1/2.4);
 
-	printf("TSC: session start:%llu(cycles), end:%llu(cycles), length:%llu(cycles), %lf (ns)\n", 
+	printf("TSC: session start:%llu(cycles), end:%llu(cycles), length:%lf(cycles), %lf (ns)\n", 
 			start_of_log, end_of_log, total_tsc_time_cycles, total_tsc_time_ns);
 
 
@@ -121,7 +121,7 @@ int switch_infprev_finalize(EventHandler *handler)
 	return 0;
 }
 
-/* Description:	Helper function for generate_cpu_share_stats()
+/* Description:	Helper function for switch_infprev_event()
    Searches for existing domain id data.
    if dom exists
    	update runtime
@@ -169,7 +169,8 @@ unsigned short add_time_to_list(DomTime *dt, Event *ev)
 
 	return num;
 }
-		
+
+
 /* Extern Event handler struct */
 struct EventHandler switch_infprev_handler = {
 	.name = "switch_infprev",
