@@ -6,6 +6,7 @@ OBJS=	Event.o\
 	Reader.o\
 	Switch_infprev.o\
 	Switch_infnext.o\
+	Domain_wake.o\
 	Switch_sched.o
 
 vpath %.h ../../include
@@ -32,7 +33,10 @@ Switch_infprev.o: Switch_infprev.h Switch_infprev.c Macros.h Externals.h
 Switch_infnext.o: Switch_infnext.h Switch_infnext.c Macros.h Externals.h
 	$(CC) $(INC) -c Switch_infnext.c
 
-Switch_sched.o: Switch_sched.h Switch_sched.c Macros.h Externals.h Switch_infnext.h Switch_infprev.h
+Domain_wake.o: Domain_wake.h Domain_wake.c Macros.h Externals.h Switch_sched.h
+	$(CC) $(INC) -c Domain_wake.c
+
+Switch_sched.o: Switch_sched.h Switch_sched.c Macros.h Externals.h Switch_infnext.h Switch_infprev.h Domain_wake.h
 	$(CC) $(INC) -c Switch_sched.c
 
 clean: 

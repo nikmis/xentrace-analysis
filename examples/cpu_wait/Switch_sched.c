@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "Event.h"
 #include "EventHandler.h"
@@ -7,6 +9,7 @@
 #include "Switch_sched.h"
 #include "Switch_infprev.h"
 #include "Switch_infnext.h"
+#include "Domain_wake.h"
 
 SwitchSchedData switchSchedData;
 
@@ -17,6 +20,9 @@ int switch_sched_init(EventHandler *handler)
 	dat->schedPrevDomId = 0x7fff; /* idle domain */
 	dat->schedActiveDomId = 0x7fff; /* idle domain */
 	dat->schedTsc = 0;
+	dat->totalWaitTime = 0;
+
+	memset(dat->d, 0, sizeof(struct DomIdWaitTime) * MAX_DOMS);
 
 	return 0;
 }
@@ -31,11 +37,57 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 
 	sanity_check_domId();
 
+	/* Flag set and active domain is also requested wake domain */
+	if(get_wake_dom_flag() && (dat->schedActiveDomId == get_wake_dom_id())) 
+	{
+		dat->numDoms = add_dom_wait_time(dat);	
+
+		reset_wake_dom_flag();
+	}
+
 	return 0;
+}
+
+unsigned short add_dom_wait_time(SwitchSchedData *dat)
+{
+	/* Retain value of num of Doms observed so far */
+	static unsigned short numDoms = 0;
+	short i = 0;
+	
+	for(i = 0; i < numDoms; i++)
+	{
+		/* Check if dom id already exists */
+		if(dat->schedActiveDomId == dat->d[i].domId)
+		{
+			dat->d[i].domIdWaitTime += dat->schedTsc - get_wake_tsc();
+			dat->totalWaitTime += dat->d[i].domIdWaitTime;
+			return numDoms;
+		}
+	}
+
+	if(numDoms == MAX_DOMS)
+	{
+		/* No new doms can be added */
+		return numDoms;
+	}
+
+	/* Do NOT add wait times for idle domain */
+	if(dat->schedActiveDomId != 0x7fff)
+	{
+		dat->d[i].domId = dat->schedActiveDomId;
+		dat->d[i].domIdWaitTime = dat->schedTsc - get_wake_tsc();
+		dat->totalWaitTime += dat->d[i].domIdWaitTime;
+		
+		numDoms = i + 1;
+	}
+
+
+	return numDoms;
 }
 
 int switch_sched_finalize(EventHandler *handler)
 {
+
 	return 0;
 }
 
