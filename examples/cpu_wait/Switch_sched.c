@@ -41,9 +41,9 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	if(get_wake_dom_flag() && (dat->schedActiveDomId == get_wake_dom_id())) 
 	{
 		dat->numDoms = add_dom_wait_time(dat);	
-
-		reset_wake_dom_flag();
 	}
+
+	reset_wake_dom_flag();
 
 	return 0;
 }
@@ -87,6 +87,17 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 
 int switch_sched_finalize(EventHandler *handler)
 {
+	short i = 0;
+	SwitchSchedData *dat = (SwitchSchedData *)handler->data;
+
+	for(i = 0; i < dat->numDoms; i++)
+	{
+		printf("domId: %u : CPU Wait Time: %lf (ms)\n",
+				dat->d[i].domId,
+				(double)dat->d[i].domIdWaitTime/(1000000 * CPU_FREQ));
+	}
+
+	printf("Total CPU Wait time for all domains: %lf (ms)\n", (double)dat->totalWaitTime/(1000000 * CPU_FREQ));
 
 	return 0;
 }
