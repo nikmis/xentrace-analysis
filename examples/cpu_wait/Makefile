@@ -5,7 +5,8 @@ OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
 	Switch_infprev.o\
-	Switch_infnext.o
+	Switch_infnext.o\
+	Switch_sched.o
 
 vpath %.h ../../include
 vpath %.h .
@@ -30,6 +31,9 @@ Switch_infprev.o: Switch_infprev.h Switch_infprev.c Macros.h Externals.h
 
 Switch_infnext.o: Switch_infnext.h Switch_infnext.c Macros.h Externals.h
 	$(CC) $(INC) -c Switch_infnext.c
+
+Switch_sched.o: Switch_sched.h Switch_sched.c Macros.h Externals.h Switch_infnext.h Switch_infprev.h
+	$(CC) $(INC) -c Switch_sched.c
 
 clean: 
 	rm -rf ../../test/Cpu_wait.out
