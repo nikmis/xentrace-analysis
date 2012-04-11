@@ -27,5 +27,7 @@ int main(int argc, char *argv[])
 
 	reader_loop(&reader);
 
+	reader_exit(&reader);
+
 	return 0;
 }

@@ -114,6 +114,9 @@ int switch_infprev_finalize(EventHandler *handler)
 	
 		++i;
 	}
+
+	free(dat->dt);
+
 	return 0;
 }
 
