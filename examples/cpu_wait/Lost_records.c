@@ -4,6 +4,7 @@
 #include "EventHandler.h"
 #include "Macros.h"
 #include "Trace.h"
+#include "Lost_records.h"
 
 int lost_records_init(EventHandler *handler)
 {

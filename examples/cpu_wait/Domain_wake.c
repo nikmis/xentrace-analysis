@@ -72,10 +72,9 @@ unsigned long long get_wake_tsc(void)
 struct EventHandler domainWakeHandler =
 {
 	.name = "domain_wake",
-	.event_id = TRC_SCHED_WAKE,
+	.event_id =TRC_SCHED_WAKE,
 	.init = domain_wake_init,
 	.data = (void*)&domainWakeData,
 	.process_event = domain_wake_handler,
 	.finalize = domain_wake_finalize,
 };
-
