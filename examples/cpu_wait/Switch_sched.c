@@ -41,9 +41,9 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	if(get_wake_dom_flag() && (dat->schedActiveDomId == get_wake_dom_id())) 
 	{
 		dat->numDoms = add_dom_wait_time(dat);	
+		reset_wake_dom_flag();
 	}
 
-	reset_wake_dom_flag();
 
 	return 0;
 }
