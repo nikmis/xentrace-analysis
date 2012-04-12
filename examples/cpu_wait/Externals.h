@@ -1,5 +1,3 @@
-#include "EventHandler .h"
-
 /* Switch_infprev */
 extern struct EventHandler switchInfprevHandler;
 
