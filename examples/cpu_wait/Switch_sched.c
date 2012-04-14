@@ -37,7 +37,7 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 
 	sanity_check_domId();
 
-	/* Flag set and active domain is also requested wake domain */
+	/* Proceed only if domain wake flag is set and active domain is also the requested wake domain */
 	if(get_wake_dom_flag() && (dat->schedActiveDomId == get_wake_dom_id())) 
 	{
 		dat->numDoms = add_dom_wait_time(dat);	
@@ -60,7 +60,10 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 		if(dat->schedActiveDomId == dat->d[i].domId)
 		{
 			dat->d[i].domIdWaitTime += dat->schedTsc - get_wake_tsc();
-			dat->totalWaitTime += dat->d[i].domIdWaitTime;
+			dat->totalWaitTime += dat->schedTsc - get_wake_tsc();
+			/* Debug Msg
+			printf("dom_id = %5u | delta = %lld | wait_time = %llu | total_wait_time = %llu | sched_TSC = %llu | wake_TSC = %llu\n", dat->d[i].domId, dat->schedTsc - get_wake_tsc(), dat->d[i].domIdWaitTime, dat->totalWaitTime, dat->schedTsc, get_wake_tsc());
+			*/
 			return numDoms;
 		}
 	}
@@ -76,12 +79,14 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 	{
 		dat->d[i].domId = dat->schedActiveDomId;
 		dat->d[i].domIdWaitTime = dat->schedTsc - get_wake_tsc();
-		dat->totalWaitTime += dat->d[i].domIdWaitTime;
+		dat->totalWaitTime += dat->schedTsc - get_wake_tsc();
 		
 		numDoms = i + 1;
 	}
 
-
+	/*
+	printf("Outside: dom_id = %5u | wait_time = %llu | total_wait_time = %llu\n", dat->d[i].domId, dat->d[i].domIdWaitTime, dat->totalWaitTime);
+	*/
 	return numDoms;
 }
 
