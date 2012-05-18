@@ -7,6 +7,7 @@
    For Xen 4.1 and above */
 typedef struct Event
 {
+	unsigned int cpu;
 	unsigned int event_id;
 	unsigned int n_data;
 	unsigned int tsc_in;

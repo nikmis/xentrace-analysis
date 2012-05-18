@@ -68,10 +68,12 @@ int parse_next_event(Event *ev, FILE *fp)
 	printf("cpu:%u, cycles:%llu, event:%x, data0:%lx, data1:%lx, data2:%lx, data3:%lx, data4:%lx\n", 
 			cpu, rec.cycles, rec.event, rec.data[0], rec.data[1], rec.data[2], rec.data[3], rec.data[4]);
 	*/
+	ev->cpu = cpu;
 	ev->event_id = rec.event;
 	ev->tsc = rec.cycles;
 	ev->ns = rec.ns;
 	ev->n_data = 5;
+
 	ev->data[0] = rec.data[0];
 	ev->data[1] = rec.data[1];
 	ev->data[2] = rec.data[2];
