@@ -47,26 +47,29 @@ int parse_next_event(Event *ev, FILE *fp)
 	unsigned int cpu;
 	t_rec rec;
 
-	if(fread(&cpu, sizeof(cpu), 1, fp) == 0)
+	if(fread(&cpu, sizeof(cpu), 1, fp) != 1)
 	{
 		if(!feof(fp))
 		{
 			fprintf(stderr, "%s:%d: File read failed - failed to read cpu id\n", __FILE__, __LINE__);
-			return FAIL;
 		}
+
+		return FAIL;
+
 	}
 
-	if(fread(&rec, sizeof(rec), 1, fp) == 0)
+	if(fread(&rec, sizeof(rec), 1, fp) != 1)
 	{
 		if(!feof(fp))
 		{
 			fprintf(stderr, "%s:%d: File read failed - failed to read t_rec data\n", __FILE__, __LINE__);
-			return FAIL;
 		}
+
+		return FAIL;
 	}
-	/*
-	printf("cpu:%u, cycles:%llu, event:%x, data0:%lx, data1:%lx, data2:%lx, data3:%lx, data4:%lx\n", 
-			cpu, rec.cycles, rec.event, rec.data[0], rec.data[1], rec.data[2], rec.data[3], rec.data[4]);
+	/*	
+	printf("cpu:%u, cycles:%llu, ns:%llu, event:%x, data0:%lx, data1:%lx, data2:%lx, data3:%lx, data4:%lx\n", 
+			cpu, rec.cycles, rec.ns, rec.event, rec.data[0], rec.data[1], rec.data[2], rec.data[3], rec.data[4]);
 	*/
 	ev->cpu = cpu;
 	ev->event_id = rec.event;
