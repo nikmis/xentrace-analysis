@@ -1,21 +1,21 @@
 CC=gcc -Wall -m32
-INC=-I./include -I./include/handlers
-
-HDLR_SRC=$(wildcard src/handlers/*.c)
-HDLR_INC=$(wildcard include/handlers/*.h)
+INC=-I../../include
 
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
-	Handlers.o
+	Switch_infprev.o\
+	Switch_infnext.o\
+	Domain_wake.o\
+	Switch_sched.o
 
-vpath %.h ./include
-vpath %.h ./include/handlers
-vpath %.c ./src
-vpath %.c ./src/handlers
+vpath %.h ../../include
+vpath %.h .
+vpath %.c ../../src
+vpath %.c .
 
 all: main.c $(OBJS) Macros.h Externals.h
-	$(CC) $(INC) $<  *.o -o test/a.out	
+	$(CC) $(INC) $<  *.o -o ../../test/Cpu_wait.out	
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -27,9 +27,18 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 Reader.o: Reader.c Reader.h Macros.h
 	$(CC) $(INC) -c $< -o $@
 
-Handlers.o: $(HDLR_SRC) $(HDLR_INC) Macros.h Externals.h
-	$(CC) $(INC) -c $(filter %.c,$^)
+Switch_infprev.o: Switch_infprev.h Switch_infprev.c Macros.h Externals.h
+	$(CC) $(INC) -c Switch_infprev.c
+
+Switch_infnext.o: Switch_infnext.h Switch_infnext.c Macros.h Externals.h
+	$(CC) $(INC) -c Switch_infnext.c
+
+Domain_wake.o: Domain_wake.h Domain_wake.c Macros.h Externals.h Switch_sched.h
+	$(CC) $(INC) -c Domain_wake.c
+
+Switch_sched.o: Switch_sched.h Switch_sched.c Macros.h Externals.h Switch_infnext.h Switch_infprev.h Domain_wake.h
+	$(CC) $(INC) -c Switch_sched.c
 
 clean: 
-	rm -rf test/*.out
+	rm -rf ../../test/Cpu_wait.out
 	rm -rf *.o
