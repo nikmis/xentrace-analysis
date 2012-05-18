@@ -40,6 +40,9 @@ int parse_event(Event *ev, FILE *fp, unsigned int ev_id)
  */
 int parse_next_event(Event *ev, FILE *fp)
 {
+/* CODE CLEANUP: Modify the Event reading code to incorporate 32, 64 bit compatibility.
+ *               Also remove t_rec struct and use only Event struct
+ */  
 #ifndef __XEN_4
 	unsigned int cpu;
 	t_rec rec;
@@ -67,6 +70,7 @@ int parse_next_event(Event *ev, FILE *fp)
 	*/
 	ev->event_id = rec.event;
 	ev->tsc = rec.cycles;
+	ev->ns = rec.ns;
 	ev->n_data = 5;
 	ev->data[0] = rec.data[0];
 	ev->data[1] = rec.data[1];

@@ -14,6 +14,7 @@ int switch_infprev_init(EventHandler *handler)
 
 	dat->prevDomId = 0x7fff; /* idle domain */
 	dat->prevTsc = 0;
+	dat->prevNs = 0;
 
 	return 0;
 }
@@ -24,6 +25,7 @@ int switch_infprev_handler(EventHandler *handler, Event *event)
 
 	dat->prevDomId = event->data[0];
 	dat->prevTsc = event->tsc;
+	dat->prevNs = event->ns;
 
 	return 0;
 }
@@ -42,6 +44,12 @@ unsigned long long get_prev_tsc(void)
 {
 	return switchPrevData.prevTsc;
 }
+
+unsigned long long get_prev_ns(void)
+{
+	return switchPrevData.prevNs;
+}
+
 
 struct EventHandler switchInfprevHandler =
 {

@@ -6,6 +6,7 @@ typedef struct DomainWakeData
 	short wakeDomFlag;
 	unsigned int wakeDomId;
 	unsigned long long wakeTsc;
+	unsigned long long wakeNs;
 } DomainWakeData;
 
 /* Event handler functions */
@@ -16,6 +17,7 @@ int domain_wake_finalize(EventHandler *handler);
 /* Functions to provide global access to handler data */
 unsigned int get_wake_dom_id(void);
 unsigned long long get_wake_tsc(void);
+unsigned long long get_wake_ns(void);
 
 void set_wake_dom_flag(void);
 void reset_wake_dom_flag(void);

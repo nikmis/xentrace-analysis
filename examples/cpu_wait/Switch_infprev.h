@@ -5,6 +5,7 @@ typedef struct SwitchPrevData
 {
 	unsigned int prevDomId;
 	unsigned long long prevTsc;
+	unsigned long long prevNs;
 } SwitchPrevData;
 
 /* Event handler functions */
@@ -15,5 +16,6 @@ int switch_infprev_finalize(EventHandler *handler);
 /* Functions to provide global access to handler data */
 unsigned int get_prev_dom_id(void);
 unsigned long long get_prev_tsc(void);
+unsigned long long get_prev_ns(void);
 
 #endif

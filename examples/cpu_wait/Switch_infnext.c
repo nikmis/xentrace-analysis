@@ -14,6 +14,7 @@ int switch_infnext_init(EventHandler *handler)
 
 	dat->nextDomId = 0x7fff; /* idle domain */
 	dat->nextTsc = 0;
+	dat->nextNs = 0;
 
 	return 0;
 }
@@ -24,6 +25,7 @@ int switch_infnext_handler(EventHandler *handler, Event *event)
 
 	dat->nextDomId = event->data[0];
 	dat->nextTsc = event->tsc;
+	dat->nextNs = event->ns;
 
 	return 0;
 }
@@ -41,6 +43,11 @@ unsigned int get_next_dom_id(void)
 unsigned long long get_next_tsc(void)
 {
 	return switchNextData.nextTsc;
+}
+
+unsigned long long get_next_ns(void)
+{
+	return switchNextData.nextNs;
 }
 
 struct EventHandler switchInfnextHandler =

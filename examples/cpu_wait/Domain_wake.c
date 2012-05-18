@@ -16,6 +16,7 @@ int domain_wake_init(EventHandler *handler)
 	dat->wakeDomFlag = 0;
 	dat->wakeDomId = 0x7fff; /* idle domain */
 	dat->wakeTsc = 0;
+	dat->wakeNs = 0;
 
 	return 0;
 }
@@ -26,6 +27,7 @@ int domain_wake_handler(EventHandler *handler, Event *event)
 
 	dat->wakeDomId = event->data[0];
 	dat->wakeTsc = event->tsc;
+	dat->wakeNs = event->ns;
 
 	if(get_active_dom_id() != get_wake_dom_id()) /* Need to wake domain */
 	{
@@ -67,6 +69,11 @@ unsigned int get_wake_dom_id(void)
 unsigned long long get_wake_tsc(void)
 {
 	return domainWakeData.wakeTsc;
+}
+
+unsigned long long get_wake_ns(void)
+{
+	return domainWakeData.wakeNs;
 }
 
 struct EventHandler domainWakeHandler =
