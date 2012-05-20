@@ -40,9 +40,8 @@ int parse_event(Event *ev, FILE *fp, unsigned int ev_id);
 int parse_next_event(Event *, FILE *);
 void clear_event(Event *);
 
-/* Modular event parse functions */
-int parse_event_id(Event *, FILE *);
-int parse_timestamp(Event *, FILE *);
-int parse_event_data(Event *, FILE *);
-
+/* Multi core support */
+int return_next_event(Event *ev);
+int sort_events_by_ns(FILE *fp);
+void free_events(void);
 #endif

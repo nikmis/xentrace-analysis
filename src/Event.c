@@ -1,8 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "Macros.h"
 #include "Event.h"
 
+static Event *eventList = NULL;
+static unsigned long eventCount = 0;
+static unsigned long numEvents = 0;
+
+int compare(const void *a, const void *b)
+{
+	return ( ((Event *)a)->ns - ((Event *)b)->ns);
+}
 
 /* Description:	Generic event parse function
    Parses event passed as function argument.
@@ -43,7 +52,6 @@ int parse_next_event(Event *ev, FILE *fp)
 /* CODE CLEANUP: Modify the Event reading code to incorporate 32, 64 bit compatibility.
  *               Also remove t_rec struct and use only Event struct
  */  
-#ifndef __XEN_4
 	unsigned int cpu;
 	t_rec rec;
 
@@ -83,123 +91,48 @@ int parse_next_event(Event *ev, FILE *fp)
 	ev->data[3] = rec.data[3];
 	ev->data[4] = rec.data[4];
 
-
-#else
-	if(parse_event_id(ev, fp) == FAIL)
-	{
-		fprintf(stderr, "%s:%d: parse_event_id returned FAIL\n", __FILE__, __LINE__);
-		return FAIL;
-	}
-
-	if(parse_timestamp(ev, fp) == FAIL)
-	{
-		fprintf(stderr, "%s:%d: parse_timestamp returned FAIL\n", __FILE__, __LINE__);
-		return FAIL;
-	}
-
-	if(parse_event_data(ev, fp) == FAIL)
-	{
-		fprintf(stderr, "%s:%d: parse_event_data returned FAIL\n", __FILE__, __LINE__);
-		return FAIL;
-	}
-#endif
 	return SUCCESS;
 }
 
-/* Description:	Modular event parse function
-   Parses the event id and related metadata.
- */
-int parse_event_id(Event *ev, FILE *fp)
+int sort_events_by_ns(FILE *fp)
 {
-	unsigned int x; 
+	int i = 0;
+	unsigned long fsize;
 
-	if(check_null(ev, fp))
+	fseek(fp, 0, SEEK_END);
+	fsize = ftell(fp);
+	rewind(fp);
+
+	// No. of events = file_size/(size of cpu + t_rec)
+	numEvents = fsize/(sizeof(unsigned int) + sizeof(t_rec));
+
+	eventList = (Event *)malloc(sizeof(Event) * numEvents);
+
+	for(i = 0; i < numEvents; i++)
 	{
-		fprintf(stderr, "%s:%d: Null pointers passed\n", __FILE__, __LINE__);
-		return FAIL;
+		if(parse_next_event(&eventList[i], fp) != SUCCESS)
+			break;
 	}
 
-	if(fread(&x, sizeof(unsigned int), 1, fp) == 0)
-	{
-		if(!feof(fp))
-		{
-			fprintf(stderr, "%s:%d: File read failed\n", __FILE__, __LINE__);
-			return FAIL;
-		}
-	}
-
-	ev->n_data = x >> 28 & 0x7;
-	ev->tsc_in = x >> 31;
-
-	ev->event_id = x & 0x0fffffff;
+	qsort(eventList, numEvents, sizeof(Event), compare);
 
 	return SUCCESS;
 }
 
-/* Description:	Modular event parse function
-   Parses timestamp realted to event.
- */
-int parse_timestamp(Event *ev, FILE *fp)
+int return_next_event(Event *ev)
 {
-	unsigned long long x;
-
-	if(check_null(ev, fp))
+	if(eventCount < numEvents)
 	{
-		fprintf(stderr, "%s:%d: Null pointers passed\n", __FILE__, __LINE__);
-		return FAIL;
-	}
-
-	/* No timestamp information */
-	if(ev->tsc_in != 1)
-	{
-		ev->tsc = 0;
+		memcpy(ev, &eventList[eventCount++], sizeof(Event));
 		return SUCCESS;
 	}
-
-	if(fread(&x, sizeof(unsigned long long), 1, fp) == 0)
-	{
-		if(!feof(fp))
-		{
-			fprintf(stderr, "%s:%d: File read failed\n", __FILE__, __LINE__);
-			return FAIL;
-		}
-	}
-
-	ev->tsc = x;
-
-	return SUCCESS;
+	else
+		return FAIL;
 }
 
-/* Description:	Modular event parse function
-   Parses event data 
- */
-int parse_event_data(Event *ev, FILE *fp)
+void free_events(void)
 {
-	unsigned int i = 0;
-	unsigned int x;
-
-	if(check_null(ev, fp))
-	{
-		fprintf(stderr, "%s:%d: Null pointers passed\n", __FILE__, __LINE__);
-		return FAIL;
-	}
-
-	for(i = 0; i < ev->n_data; i++)
-	{
-		if(fread(&x, sizeof(unsigned int), 1, fp) == 0)
-		{
-			if(!feof(fp))
-			{	
-				fprintf(stderr, "%s:%d: File read failed\n", __FILE__, __LINE__);
-				return FAIL;
-			}
-		}
-
-		ev->data[i] = x;
-		x = 0;
-	}
-
-	return SUCCESS;
+	free(eventList);
 }
 
 /* Description:	Helper function

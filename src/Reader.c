@@ -17,6 +17,9 @@ void reader_init(Reader *reader, const char *filename)
 		exit(0);
 	}
 
+	/* Init and sort logs */
+	sort_events_by_ns(reader->fp);
+
 	/* Init Hash table */
 	reader->handler_array = (EventHandler *)malloc(sizeof(struct EventHandler) * MAX_EVENTS); 
 
@@ -38,6 +41,8 @@ void reader_exit(Reader *reader)
 	fclose(reader->fp);
 
 	free(reader->handler_array);
+	free_events();
+
 	return;
 }
 
@@ -52,7 +57,7 @@ int reader_loop(Reader *reader)
 
 	do
 	{
-		ret = parse_next_event(&event, reader->fp);
+		ret = return_next_event(&event);
 		if (ret == FAIL)
 			break;
 		evh_call_handlers(reader, &event);
