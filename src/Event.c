@@ -10,7 +10,11 @@ static unsigned long numEvents = 0;
 
 int compare(const void *a, const void *b)
 {
-	return ( ((Event *)a)->ns - ((Event *)b)->ns);
+	long long result = ( ((Event *)a)->ns - ((Event *)b)->ns);
+
+	if(result > 0)		return 1;
+	else if(result < 0)	return -1;
+	else			return 0;
 }
 
 /* Description:	Generic event parse function
