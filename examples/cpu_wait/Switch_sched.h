@@ -11,9 +11,12 @@ typedef struct SwitchSchedData
 {
 	/* Event specific members */
 	unsigned int schedPrevDomId;
+	unsigned int schedPrevVcpu;
 	unsigned int schedActiveDomId;
+	unsigned int schedActiveVcpu;
 	unsigned long long schedTsc;
 	unsigned long long schedNs;
+	unsigned int schedCpu;
 	/* Dom Wait time members */
 	DomIdWaitTime d[MAX_DOMS];
 	unsigned long long totalWaitTime;
@@ -24,6 +27,7 @@ typedef struct SwitchSchedData
 int switch_sched_init(EventHandler *handler);
 int switch_sched_handler(EventHandler *handler, Event *event);
 int switch_sched_finalize(EventHandler *handler);
+void switch_sched_reset(void);
 
 /* Functions to provide global access to handler data */
 unsigned int get_old_dom_id(void);

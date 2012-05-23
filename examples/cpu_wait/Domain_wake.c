@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "Event.h"
 #include "EventHandler.h"
@@ -7,53 +9,41 @@
 #include "Domain_wake.h"
 #include "Switch_sched.h"
 
-DomainWakeData domainWakeData;
+/* Use list.h instead of fixed len array */
+DomainWakeData domainWakeData[MAX_DOMS][MAX_VCPUS];
 
 int domain_wake_init(EventHandler *handler)
 {
-	DomainWakeData *dat = (DomainWakeData *) handler->data;
-
-	dat->wakeDomFlag = 0;
-	dat->wakeDomId = 0x7fff; /* idle domain */
-	dat->wakeTsc = 0;
-	dat->wakeNs = 0;
-
 	return 0;
 }
 
 int domain_wake_handler(EventHandler *handler, Event *event)
 {
-	DomainWakeData *dat = (DomainWakeData *) handler->data;
-
-	dat->wakeDomId = event->data[0];
-	dat->wakeTsc = event->tsc;
-	dat->wakeNs = event->ns;
-
-	if(get_active_dom_id() != get_wake_dom_id()) /* Need to wake domain */
-	{
-		set_wake_dom_flag();
-	}
-	else /* Domain is running. No wait time */
-	{
-		reset_wake_dom_flag();
-	}
+	unsigned int domId = event->data[0]; 
+	unsigned int vcpu = event->data[1]; 
+	
+	domainWakeData[domId][vcpu].wakeDomFlag = 1;
+	domainWakeData[domId][vcpu].wakeTsc = event->tsc;
+	domainWakeData[domId][vcpu].wakeNs = event->ns;
 
 	return 0;
 }
 
-void set_wake_dom_flag(void)
+void domain_wake_reset(void)
 {
-	domainWakeData.wakeDomFlag = 1;
+	memset(domainWakeData, 0, sizeof(DomainWakeData)*MAX_DOMS*MAX_VCPUS);
 }
 
-void reset_wake_dom_flag(void)
+void reset_wake_dom_flag(unsigned int domId, unsigned int vcpu)
 {
-	domainWakeData.wakeDomFlag = 0;
+	domainWakeData[domId][vcpu].wakeDomFlag = 0;
+	domainWakeData[domId][vcpu].wakeTsc = 0;
+	domainWakeData[domId][vcpu].wakeNs = 0;
 }
 
-short get_wake_dom_flag(void)
+short get_wake_dom_flag(unsigned int domId, unsigned int vcpu)
 {
-	return domainWakeData.wakeDomFlag;
+	return domainWakeData[domId][vcpu].wakeDomFlag;
 }
 
 int domain_wake_finalize(EventHandler *handler)
@@ -61,19 +51,14 @@ int domain_wake_finalize(EventHandler *handler)
 	return 0;
 }
 
-unsigned int get_wake_dom_id(void)
+unsigned long long get_wake_tsc(unsigned int domId, unsigned int vcpu)
 {
-	return domainWakeData.wakeDomId;
+	return domainWakeData[domId][vcpu].wakeTsc;
 }
 
-unsigned long long get_wake_tsc(void)
+unsigned long long get_wake_ns(unsigned int domId, unsigned int vcpu)
 {
-	return domainWakeData.wakeTsc;
-}
-
-unsigned long long get_wake_ns(void)
-{
-	return domainWakeData.wakeNs;
+	return domainWakeData[domId][vcpu].wakeNs;
 }
 
 struct EventHandler domainWakeHandler =
@@ -81,7 +66,7 @@ struct EventHandler domainWakeHandler =
 	.name = "domain_wake",
 	.event_id =TRC_SCHED_WAKE,
 	.init = domain_wake_init,
-	.data = (void*)&domainWakeData,
+	.data = (void*)domainWakeData,
 	.process_event = domain_wake_handler,
 	.finalize = domain_wake_finalize,
 };

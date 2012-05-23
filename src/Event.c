@@ -57,6 +57,7 @@ int parse_next_event(Event *ev, FILE *fp)
  *               Also remove t_rec struct and use only Event struct
  */  
 	unsigned int cpu;
+	int i = 0;
 	t_rec rec;
 
 	if(fread(&cpu, sizeof(cpu), 1, fp) != 1)
@@ -87,13 +88,13 @@ int parse_next_event(Event *ev, FILE *fp)
 	ev->event_id = rec.event;
 	ev->tsc = rec.cycles;
 	ev->ns = rec.ns;
-	ev->n_data = 5;
+	ev->lastNs = 0;
+	ev->n_data = MAX_EV_DATA;
 
-	ev->data[0] = rec.data[0];
-	ev->data[1] = rec.data[1];
-	ev->data[2] = rec.data[2];
-	ev->data[3] = rec.data[3];
-	ev->data[4] = rec.data[4];
+	for(i = 0; i < MAX_EV_DATA; i++)
+	{
+		ev->data[i] = rec.data[i];
+	}
 
 	return SUCCESS;
 }
@@ -127,6 +128,11 @@ int return_next_event(Event *ev)
 {
 	if(eventCount < numEvents)
 	{
+		/* Keep track of last ns timestamp for lost_records check */
+		if(eventCount > 0)
+		{
+			eventList[eventCount].lastNs = eventList[eventCount - 1].ns;
+		}
 		memcpy(ev, &eventList[eventCount++], sizeof(Event));
 		return SUCCESS;
 	}

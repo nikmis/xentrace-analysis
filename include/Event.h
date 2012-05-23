@@ -15,6 +15,7 @@ typedef struct Event
 	/* nano seconds is much better metric than tsc since it's synchronized across cpus/cores. 
 	 * Logs can be sorted without much error in timeline. */
 	unsigned long long ns;
+	unsigned long long lastNs;
 	unsigned int data[MAX_EV_DATA];
 } Event;
 

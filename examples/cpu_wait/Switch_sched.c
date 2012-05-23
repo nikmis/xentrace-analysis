@@ -18,7 +18,9 @@ int switch_sched_init(EventHandler *handler)
 	SwitchSchedData *dat = (SwitchSchedData *) handler->data;
 
 	dat->schedPrevDomId = 0x7fff; /* idle domain */
+	dat->schedPrevVcpu = 0; /* idle domain */
 	dat->schedActiveDomId = 0x7fff; /* idle domain */
+	dat->schedActiveVcpu = 0; /* idle domain */
 	dat->schedTsc = 0;
 	dat->schedNs = 0;
 	dat->totalWaitTime = 0;
@@ -33,17 +35,23 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	SwitchSchedData *dat = (SwitchSchedData *) handler->data;
 
 	dat->schedPrevDomId = event->data[0];
+	dat->schedPrevVcpu = event->data[1];
 	dat->schedActiveDomId = event->data[2];
+	dat->schedActiveVcpu = event->data[3];
 	dat->schedTsc = event->tsc;
 	dat->schedNs = event->ns;
+	dat->schedCpu = event->cpu;
 
+	/* Update infprev_code to track old prev according to vcpus and dom Id
 	sanity_check_domId();
+ 	*/
 
-	/* Proceed only if domain wake flag is set and active domain is also the requested wake domain */
-	if(get_wake_dom_flag() && (dat->schedActiveDomId == get_wake_dom_id())) 
+	/* Proceed only if domain wake flag is set for the active domain */
+	if(	(dat->schedActiveDomId != 0x7fff) &&
+		(get_wake_dom_flag(dat->schedActiveDomId, dat->schedActiveVcpu)) )
 	{
 		dat->numDoms = add_dom_wait_time(dat);	
-		reset_wake_dom_flag();
+		reset_wake_dom_flag(dat->schedActiveDomId, dat->schedActiveVcpu);
 	}
 
 
@@ -61,17 +69,18 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 		/* Check if dom id already exists */
 		if(dat->schedActiveDomId == dat->d[i].domId)
 		{
-			/* 
-			dat->d[i].domIdWaitTime += dat->schedTsc - get_wake_tsc();
-			dat->totalWaitTime += dat->schedTsc - get_wake_tsc();
-			*/
 			/* Use ns instead for computing wait times */
 
-			dat->d[i].domIdWaitTime += dat->schedNs - get_wake_ns();
-			dat->totalWaitTime += dat->schedNs - get_wake_ns();
+			long long diff = dat->schedNs - get_wake_ns(dat->schedActiveDomId, dat->schedActiveVcpu);
+			if(diff < 0)
+				printf("negative wait: %lld %lld\n", diff, dat->schedNs);
+			dat->d[i].domIdWaitTime += diff;
+			dat->totalWaitTime += diff;
 
 			/* Debug Msg
-			printf("dom_id = %5u | delta = %lld | wait_time = %llu | total_wait_time = %llu | sched_TSC = %llu | wake_TSC = %llu\n", dat->d[i].domId, dat->schedTsc - get_wake_tsc(), dat->d[i].domIdWaitTime, dat->totalWaitTime, dat->schedTsc, get_wake_tsc());
+			printf("dom_id = %5u | delta = %lld | wait_time = %llu | total_wait_time = %llu | sched_TSC = %llu 
+				| wake_TSC = %llu\n", dat->d[i].domId, dat->schedTsc - get_wake_tsc(), dat->d[i].domIdWaitTime, 
+				dat->totalWaitTime, dat->schedTsc, get_wake_tsc());
 			*/
 			return numDoms;
 		}
@@ -87,14 +96,15 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 	if(dat->schedActiveDomId != 0x7fff)
 	{
 		dat->d[i].domId = dat->schedActiveDomId;
-		dat->d[i].domIdWaitTime = dat->schedNs - get_wake_ns();
-		dat->totalWaitTime += dat->schedNs - get_wake_ns();
+		dat->d[i].domIdWaitTime = dat->schedNs - get_wake_ns(dat->schedActiveDomId, dat->schedActiveVcpu);
+		dat->totalWaitTime += dat->schedNs - get_wake_ns(dat->schedActiveDomId, dat->schedActiveVcpu);
 		
 		numDoms = i + 1;
 	}
 
 	/*
-	printf("Outside: dom_id = %5u | wait_time = %llu | total_wait_time = %llu\n", dat->d[i].domId, dat->d[i].domIdWaitTime, dat->totalWaitTime);
+	printf("Outside: dom_id = %5u | wait_time = %llu | total_wait_time = %llu\n", 
+		dat->d[i].domId, dat->d[i].domIdWaitTime, dat->totalWaitTime);
 	*/
 	return numDoms;
 }
@@ -108,20 +118,26 @@ int switch_sched_finalize(EventHandler *handler)
 	{
 		printf("domId: %u : CPU Wait Time: %lf (ms)\n",
 				dat->d[i].domId,
-				/* tsc
-				(double)dat->d[i].domIdWaitTime/(1000000 * CPU_FREQ));
-				*/
-				(double)dat->d[i].domIdWaitTime/1000000);
+				(double)dat->d[i].domIdWaitTime/MEGA);
 	}
 				
 	printf("Total CPU Wait time for all domains: %lf (ms)\n", 
-			/* tsc
-			(double)dat->totalWaitTime/(1000000 * CPU_FREQ));
-			*/
-			(double)dat->totalWaitTime/1000000);
+			(double)dat->totalWaitTime/MEGA);
 	return 0;
 }
 
+void switch_sched_reset(void)
+{
+	switchSchedData.schedPrevDomId = 0x7fff; /* idle domain */
+	switchSchedData.schedPrevVcpu = 0; /* idle domain */
+	switchSchedData.schedActiveDomId = 0x7fff; /* idle domain */
+	switchSchedData.schedActiveVcpu = 0; /* idle domain */
+	switchSchedData.schedTsc = 0;
+	switchSchedData.schedNs = 0;
+	switchSchedData.totalWaitTime = 0;
+
+	memset(switchSchedData.d, 0, sizeof(struct DomIdWaitTime) * MAX_DOMS);
+}
 unsigned int get_old_dom_id(void)
 {
 	return switchSchedData.schedPrevDomId;
@@ -146,7 +162,7 @@ void sanity_check_domId(void)
 {
 	if(get_old_dom_id() != get_prev_dom_id())
 	{
-		fprintf(stderr, "%s:%d: Prev domId mismatch at TSC %llu. infprev_domId = %u, switch_prev_domId = %u \n", 
+		fprintf(stderr, "%s:%d: Prev domId mismatch at ns %llu. infprev_domId = %u, switch_prev_domId = %u \n", 
 				__FILE__, 
 				__LINE__, 
 				get_switch_ns(), 
@@ -156,7 +172,7 @@ void sanity_check_domId(void)
 
 	if(get_active_dom_id() != get_next_dom_id())
 	{
-		fprintf(stderr, "%s:%d: Next domId mismatch at TSC %llu. infnext_domId = %u, switch_active_domId = %u \n", 
+		fprintf(stderr, "%s:%d: Next domId mismatch at ns %llu. infnext_domId = %u, switch_active_domId = %u \n", 
 				__FILE__, 
 				__LINE__, 
 				get_switch_ns(), 

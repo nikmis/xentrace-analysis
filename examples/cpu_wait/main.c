@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	evh_register_handler(&reader, &switchInfnextHandler);
 	evh_register_handler(&reader, &switchSchedHandler);
 	evh_register_handler(&reader, &domainWakeHandler);
+	evh_register_handler(&reader, &lostRecordsHandler);
 
 	reader_loop(&reader);
 

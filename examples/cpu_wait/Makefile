@@ -1,4 +1,4 @@
-CC=gcc -Wall -m32
+CC=clang -g -Wall -m32
 INC=-I../../include
 
 OBJS=	Event.o\
@@ -7,7 +7,8 @@ OBJS=	Event.o\
 	Switch_infprev.o\
 	Switch_infnext.o\
 	Domain_wake.o\
-	Switch_sched.o
+	Switch_sched.o\
+	Lost_records.o
 
 vpath %.h ../../include
 vpath %.h .
@@ -38,6 +39,9 @@ Domain_wake.o: Domain_wake.h Domain_wake.c Macros.h Externals.h Switch_sched.h
 
 Switch_sched.o: Switch_sched.h Switch_sched.c Macros.h Externals.h Switch_infnext.h Switch_infprev.h Domain_wake.h
 	$(CC) $(INC) -c Switch_sched.c
+
+Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h Switch_sched.h Switch_infnext.h Switch_infprev.h Domain_wake.h
+	$(CC) $(INC) -c Lost_records.c
 
 clean: 
 	rm -rf ../../test/Cpu_wait.out
