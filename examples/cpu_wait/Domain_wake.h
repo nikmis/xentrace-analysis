@@ -4,11 +4,10 @@
 typedef struct DomainWakeData
 {
 	short wakeDomFlag;
+	unsigned int vcpu;
 	unsigned long long wakeTsc;
 	unsigned long long wakeNs;
-	/* To be used later 
 	list_head vcpu_list; 
-	*/
 } DomainWakeData;
 
 /* Event handler functions */
