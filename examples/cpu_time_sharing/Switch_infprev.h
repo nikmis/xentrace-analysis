@@ -10,8 +10,8 @@ typedef struct DomTime
 
 typedef struct DomAllTimes
 {
-	unsigned long long	total_time;
-	unsigned short		num_of_doms;
+	unsigned long long	totalTime;
+	unsigned short		numOfDoms;
 	DomTime			*dt;
 } DomAllTimes;
 
@@ -19,6 +19,7 @@ typedef struct DomAllTimes
 int switch_infprev_init(EventHandler *handler);
 int switch_infprev_event(EventHandler *handler, Event *event);
 int switch_infprev_finalize(EventHandler *handler);
+void switch_infprev_reset(void);
 
 /* Event Handler Helper functions */
 unsigned short add_time_to_list(DomTime *, Event *);
