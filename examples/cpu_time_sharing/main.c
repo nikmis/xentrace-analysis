@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
 
 	reader_init(&reader, argv[1]);
 
-	evh_register_handler(&reader, &switch_infprev_handler);
+	evh_register_handler(&reader, &switchInfprevHandler);
+	evh_register_handler(&reader, &lostRecordsHandler);
 
 	reader_loop(&reader);
 
