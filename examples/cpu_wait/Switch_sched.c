@@ -27,7 +27,7 @@ int switch_sched_init(EventHandler *handler)
 
 	memset(dat->d, 0, sizeof(struct DomIdWaitTime) * MAX_DOMS);
 
-	return 0;
+	return SUCCESS;
 }
 
 int switch_sched_handler(EventHandler *handler, Event *event)
@@ -55,7 +55,7 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	}
 
 
-	return 0;
+	return SUCCESS;
 }
 
 unsigned short add_dom_wait_time(SwitchSchedData *dat)
@@ -123,7 +123,7 @@ int switch_sched_finalize(EventHandler *handler)
 				
 	printf("Total CPU Wait time for all domains: %lf (ms)\n", 
 			(double)dat->totalWaitTime/MEGA);
-	return 0;
+	return SUCCESS;
 }
 
 void switch_sched_reset(void)

@@ -10,7 +10,7 @@
 
 int lost_records_init(EventHandler *handler)
 {
-	return 0;
+	return SUCCESS;
 }
 
 int lost_records_handler(EventHandler *handler, Event *event)
@@ -21,12 +21,12 @@ int lost_records_handler(EventHandler *handler, Event *event)
 		switch_sched_reset();
 		domain_wake_reset();
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int lost_records_finalize(EventHandler *handler)
 {
-	return 0;
+	return SUCCESS;
 }
 
 struct EventHandler lostRecordsHandler = 
