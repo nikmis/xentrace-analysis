@@ -17,7 +17,9 @@ int lost_records_handler(EventHandler *handler, Event *event)
 	/* Lost records received. Clear all handler data */
 	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 	{
+		/*
 		switch_infprev_reset();
+		*/
 	}
 	return 0;
 }
