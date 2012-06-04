@@ -6,6 +6,7 @@
 #include "Trace.h"
 #include "Lost_records.h"
 #include "Switch_infprev.h"
+#include "Switch_sched.h"
 
 int lost_records_init(EventHandler *handler)
 {
@@ -20,6 +21,7 @@ int lost_records_handler(EventHandler *handler, Event *event)
 		/*
 		switch_infprev_reset();
 		*/
+		switch_sched_reset();
 	}
 	return 0;
 }
