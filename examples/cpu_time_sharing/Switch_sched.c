@@ -9,6 +9,7 @@
 #include "list.h"
 #include "Switch_sched.h"
 
+/* TODO: Use list for vcpu times */
 CpuTimes cpuTimes;
 
 int switch_sched_init(EventHandler *handler)
@@ -80,7 +81,6 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	 * Create new obj and add it to list.
 	 */
 
-	/* TODO: Free memory in final and reset */
 	CpuTimes *newCpuTimes = (CpuTimes *) malloc(sizeof(CpuTimes));
 
 	/* Init array to 0 */
@@ -132,7 +132,7 @@ int switch_sched_finalize(EventHandler *handler)
 
 				for(k = 0; k < MAX_VCPUS; k++)
 				{
-					totalDomRuntime[i][k+1] += tmpCpuTimes->domVcpuTimes[i].vcpuTimes[k+1].totalVcpuTime;
+					totalDomRuntime[i][k+1] += tmpCpuTimes->domVcpuTimes[i].vcpuTimes[k].totalVcpuTime;
 				}
 			}
 		}
@@ -193,7 +193,7 @@ int switch_sched_finalize(EventHandler *handler)
 		}
 	}
 	
-	return 0;
+	return SUCCESS;
 }
 
 void switch_sched_reset(void)
