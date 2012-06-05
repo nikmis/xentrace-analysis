@@ -7,10 +7,11 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "list.h"
+#include "Switch_infprev.h"
 #include "Switch_sched.h"
 
 /* TODO: Use list for vcpu times */
-CpuTimes cpuTimes;
+static CpuTimes cpuTimes;
 
 int switch_sched_init(EventHandler *handler)
 {
@@ -27,9 +28,12 @@ int switch_sched_init(EventHandler *handler)
 
 int switch_sched_handler(EventHandler *handler, Event *event)
 {
+	unsigned int domId = event->data[0]; 
 	unsigned int domIdIndex = event->data[0]; 
 	unsigned int vcpuIdIndex = event->data[1]; 
 	
+	unsigned long long lastRuntime = 0;
+
 	if(domIdIndex == 0x7fff)	
 		domIdIndex = MAX_DOMS - 1;
 
@@ -81,6 +85,8 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	 * Create new obj and add it to list.
 	 */
 
+	lastRuntime = switch_infprev_last_runtime(event->cpu, domId);
+
 	CpuTimes *newCpuTimes = (CpuTimes *) malloc(sizeof(CpuTimes));
 
 	/* Init array to 0 */
@@ -94,10 +100,10 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	newCpuTimes->domVcpuTimes[domIdIndex].domId = event->data[0];	/* DomId is the prev/switched domain */
 
 	/* TODO: Add runtime from infprev event */
-	newCpuTimes->totalCpuTime = 0;
-	newCpuTimes->domVcpuTimes[domIdIndex].totalDomTime = 0;
+	newCpuTimes->totalCpuTime = lastRuntime;
+	newCpuTimes->domVcpuTimes[domIdIndex].totalDomTime = lastRuntime;
 	newCpuTimes->domVcpuTimes[domIdIndex].vcpuTimes[vcpuIdIndex].vcpuId = event->data[1];
-	newCpuTimes->domVcpuTimes[domIdIndex].vcpuTimes[vcpuIdIndex].totalVcpuTime = 0;
+	newCpuTimes->domVcpuTimes[domIdIndex].vcpuTimes[vcpuIdIndex].totalVcpuTime = lastRuntime;
 
 	list_add_tail(&(newCpuTimes->cpuList), &(cpuTimes.cpuList));
 
