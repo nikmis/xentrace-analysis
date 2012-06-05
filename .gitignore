@@ -4,5 +4,6 @@
 *.swo
 cscope.files
 tags
+TODO.txt
 test/
 logs/
