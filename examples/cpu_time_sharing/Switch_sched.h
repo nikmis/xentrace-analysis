@@ -5,16 +5,15 @@ typedef struct VcpuTimes
 {
 	unsigned int 		vcpuId;
 	unsigned long long 	totalVcpuTime;
-	/*
-	list_head vcpuList;
-	*/
+	list_head 		vcpuList;
 } VcpuTimes;
 
 typedef struct DomVcpuTimes
 {
 	unsigned int 		domId;
 	unsigned long long 	totalDomTime;
-	VcpuTimes 		vcpuTimes[MAX_VCPUS];
+	VcpuTimes 		vcpuTimes;
+	unsigned int		numVcpus;
 } DomVcpuTimes;
 
 typedef struct CpuTimes
@@ -34,4 +33,6 @@ int switch_sched_handler(EventHandler *handler, Event *event);
 int switch_sched_finalize(EventHandler *handler);
 void switch_sched_reset(void);
 
+/* Helper functions */
+unsigned int calc_max_num_vcpus(list_head *headCpuList);
 #endif

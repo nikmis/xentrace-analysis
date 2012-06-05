@@ -1,4 +1,4 @@
-CC=clang -Wall -m32
+CC=clang -g -Wall -m32
 INC=-I../../include
 
 OBJS=	Event.o\
