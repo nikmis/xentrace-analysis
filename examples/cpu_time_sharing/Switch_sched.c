@@ -99,7 +99,6 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	newCpuTimes->cpuId = event->cpu;
 	newCpuTimes->domVcpuTimes[domIdIndex].domId = event->data[0];	/* DomId is the prev/switched domain */
 
-	/* TODO: Add runtime from infprev event */
 	newCpuTimes->totalCpuTime = lastRuntime;
 	newCpuTimes->domVcpuTimes[domIdIndex].totalDomTime = lastRuntime;
 	newCpuTimes->domVcpuTimes[domIdIndex].vcpuTimes[vcpuIdIndex].vcpuId = event->data[1];
@@ -174,7 +173,7 @@ int switch_sched_finalize(EventHandler *handler)
 
 			if(totalDomRuntime[j][0])
 			{
-				printf("Domain CPU Utilization:\t\tDom %d = %5.2f %%\n",
+				printf("\nDomain CPU Utilization:\t\tDom %d = %5.2f %%\n",
 						(j == (MAX_DOMS - 1)) ? 0x7fff : j,
 						(float)totalDomRuntime[j][0]/totalRuntime * 100);
 
@@ -182,7 +181,7 @@ int switch_sched_finalize(EventHandler *handler)
 				{
 					if(totalDomRuntime[j][k+1])
 					{
-						printf("\tVCPU Utilization: VCPU %d = %5.2f %%\n",
+						printf("\tVCPU Utilization:\tVCPU %d = %5.2f %%\n",
 								k,
 								(float)totalDomRuntime[j][k+1]/totalDomRuntime[j][0] * 100);
 					}
