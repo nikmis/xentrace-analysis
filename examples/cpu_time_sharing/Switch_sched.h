@@ -35,4 +35,5 @@ void switch_sched_reset(void);
 
 /* Helper functions */
 unsigned int calc_max_num_vcpus(list_head *headCpuList);
+void free_list_mallocs(list_head *headCpuList);
 #endif

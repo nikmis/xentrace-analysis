@@ -182,7 +182,9 @@ int switch_sched_finalize(EventHandler *handler)
 
 		memset(totalDomRuntime, 0, sizeof(unsigned long long)*MAX_DOMS*(maxNumVcpus+1));
 
-		/* Iterate through all cpus */
+		/* Iterate through all cpus.
+		 * Calculate and store total runtimes for CPUs, domains and VCPUs.
+		 */
 		list_for_each_entry(tmpCpuTimes, headCpuList, cpuList)
 		{
 			int i;
@@ -207,7 +209,7 @@ int switch_sched_finalize(EventHandler *handler)
 
 		tmpCpuTimes = NULL;
 
-		/* Produce util by cpu */
+		/* Produce time sharing by cpu */
 		list_for_each_entry(tmpCpuTimes, headCpuList, cpuList)
 		{
 			printf("Physcial CPU Time Sharing:\tCPU %d = %5.2f %%\n", 
@@ -218,7 +220,7 @@ int switch_sched_finalize(EventHandler *handler)
 		printf("\n");
 		tmpCpuTimes = NULL;
 
-		/* Produce util by cpu */
+		/* Produce util by Cpus */
 		list_for_each_entry(tmpCpuTimes, headCpuList, cpuList)
 		{
 			unsigned long long cpuUtil = tmpCpuTimes->totalCpuTime - tmpCpuTimes->domVcpuTimes[MAX_DOMS - 1].totalDomTime;
@@ -240,6 +242,7 @@ int switch_sched_finalize(EventHandler *handler)
 						(j == (MAX_DOMS - 1)) ? 0x7fff : j,
 						(float)totalDomRuntime[j][0]/totalRuntime * 100);
 
+				/* Produce util by Vcpus */
 				for(k = 0; k < maxNumVcpus; k++)
 				{
 					if(totalDomRuntime[j][k+1])
@@ -253,24 +256,8 @@ int switch_sched_finalize(EventHandler *handler)
 		}
 
 		tmpCpuTimes = NULL;
-
-		/* Free malloc'd memory */
-		list_for_each_entry_reverse(tmpCpuTimes, headCpuList, cpuList)
-		{
-			int i;
-			for(i = 0; i < MAX_DOMS; i++)
-			{
-				VcpuTimes *tmpVcpuTimes;
-				list_head *headVcpuList = &(tmpCpuTimes->domVcpuTimes[i].vcpuTimes.vcpuList);
-
-				list_for_each_entry_reverse(tmpVcpuTimes, headVcpuList, vcpuList)
-				{
-					free(tmpVcpuTimes);
-				}
-			}
-
-			free(tmpCpuTimes);
-		}
+		
+		free_list_mallocs(headCpuList);
 	}
 	
 	return SUCCESS;
@@ -304,9 +291,24 @@ unsigned int calc_max_num_vcpus(list_head *headCpuList)
 
 void switch_sched_reset(void)
 {
-	CpuTimes *tmpCpuTimes;
 	list_head *headCpuList = &(cpuTimes.cpuList);
 	
+	free_list_mallocs(headCpuList);
+
+	INIT_LIST_HEAD(&(cpuTimes.cpuList));
+	cpuTimes.prevNs = 0;
+	cpuTimes.cpuId = 0;
+	cpuTimes.prevDomId = 0;
+	cpuTimes.prevVcpuId = 0;
+	cpuTimes.totalCpuTime = 0;	
+	memset(cpuTimes.domVcpuTimes, 0, sizeof(DomVcpuTimes)*MAX_DOMS);
+
+}
+
+void free_list_mallocs(list_head *headCpuList)
+{
+	CpuTimes *tmpCpuTimes;
+
 	/* Free malloc'd memory */
 	list_for_each_entry_reverse(tmpCpuTimes, headCpuList, cpuList)
 	{
@@ -324,15 +326,6 @@ void switch_sched_reset(void)
 
 		free(tmpCpuTimes);
 	}
-
-	INIT_LIST_HEAD(&(cpuTimes.cpuList));
-	cpuTimes.prevNs = 0;
-	cpuTimes.cpuId = 0;
-	cpuTimes.prevDomId = 0;
-	cpuTimes.prevVcpuId = 0;
-	cpuTimes.totalCpuTime = 0;	
-	memset(cpuTimes.domVcpuTimes, 0, sizeof(DomVcpuTimes)*MAX_DOMS);
-
 }
 
 struct EventHandler switchSchedHandler =
