@@ -10,7 +10,6 @@
 #include "Switch_infprev.h"
 #include "Switch_sched.h"
 
-/* TODO: Use list for vcpu times */
 static CpuTimes cpuTimes;
 
 int switch_sched_init(EventHandler *handler)
@@ -85,8 +84,8 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 
 					if(!flag)
 					{
-						/* Couldn't find vcpu, malloc new vcpu
-						 * and add it to vcpu list.
+						/* Couldn't find vcpu, or vcpu doesn't exist.
+						 * Malloc new vcpu and add it to vcpu list.
 						 */
 						flag = 0;
 
@@ -121,7 +120,7 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 	/* If here, means either list is empty or 
 	 * list doesn't have cpu.
 	 *
-	 * Create new obj and add it to list.
+	 * Malloc new obj and add it to list.
 	 */
 
 	lastRuntime = switch_infprev_last_runtime(event->cpu, domId);
@@ -263,6 +262,23 @@ int switch_sched_finalize(EventHandler *handler)
 	return SUCCESS;
 }
 
+void switch_sched_reset(void)
+{
+	list_head *headCpuList = &(cpuTimes.cpuList);
+	
+	free_list_mallocs(headCpuList);
+
+	INIT_LIST_HEAD(&(cpuTimes.cpuList));
+	cpuTimes.prevNs = 0;
+	cpuTimes.cpuId = 0;
+	cpuTimes.prevDomId = 0;
+	cpuTimes.prevVcpuId = 0;
+	cpuTimes.totalCpuTime = 0;	
+	memset(cpuTimes.domVcpuTimes, 0, sizeof(DomVcpuTimes)*MAX_DOMS);
+
+}
+
+/* Calculate max vcpus used by a domain */
 unsigned int calc_max_num_vcpus(list_head *headCpuList)
 {
 	int i;
@@ -289,22 +305,12 @@ unsigned int calc_max_num_vcpus(list_head *headCpuList)
 	return maxNumVcpus;
 }
 
-void switch_sched_reset(void)
-{
-	list_head *headCpuList = &(cpuTimes.cpuList);
-	
-	free_list_mallocs(headCpuList);
-
-	INIT_LIST_HEAD(&(cpuTimes.cpuList));
-	cpuTimes.prevNs = 0;
-	cpuTimes.cpuId = 0;
-	cpuTimes.prevDomId = 0;
-	cpuTimes.prevVcpuId = 0;
-	cpuTimes.totalCpuTime = 0;	
-	memset(cpuTimes.domVcpuTimes, 0, sizeof(DomVcpuTimes)*MAX_DOMS);
-
-}
-
+/* Free all malloc'd memory used in lists.
+ * Verified in valgrind.
+ * 	- Benign "Still reachable memory" warning.
+ * 	- TODO: Read in freed memory in below func.
+ * 		No impact on correctness or perfromance.
+ */
 void free_list_mallocs(list_head *headCpuList)
 {
 	CpuTimes *tmpCpuTimes;
