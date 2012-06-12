@@ -5,8 +5,9 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
-#include "Switch_infprev.h"
-#include "Switch_sched.h"
+#include "Exit_to_guest.h"
+#include "Exit_to_xen.h"
+
 
 int lost_records_init(EventHandler *handler)
 {
@@ -18,6 +19,8 @@ int lost_records_handler(EventHandler *handler, Event *event)
 	/* Lost records received. Clear all handler data */
 	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 	{
+		exit_to_guest_reset();
+		exit_to_xen_reset();
 	}
 	return 0;
 }
