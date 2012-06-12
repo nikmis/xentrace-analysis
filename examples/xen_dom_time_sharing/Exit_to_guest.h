@@ -1,8 +1,6 @@
 #ifndef __HDLR_EXIT_TO_GUEST
 #define __HDLR_EXIT_TO_GUEST
 
-#include "Exit_to_xen.h"
-
 typedef struct XenRuntime
 {
 	unsigned long long 	exitToGuest[MAX_DOMS];
