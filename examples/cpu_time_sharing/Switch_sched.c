@@ -208,17 +208,6 @@ int switch_sched_finalize(EventHandler *handler)
 
 		tmpCpuTimes = NULL;
 
-		/* Produce time sharing by cpu */
-		list_for_each_entry(tmpCpuTimes, headCpuList, cpuList)
-		{
-			printf("Physcial CPU Time Sharing:\tCPU %d = %5.2f %%\n", 
-					tmpCpuTimes->cpuId,
-					(float)tmpCpuTimes->totalCpuTime/totalRuntime * 100);
-		}
-
-		printf("\n");
-		tmpCpuTimes = NULL;
-
 		/* Produce util by Cpus */
 		list_for_each_entry(tmpCpuTimes, headCpuList, cpuList)
 		{
