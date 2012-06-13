@@ -29,12 +29,17 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 	list_head *head = &(domRuntime.cpuList);
 	unsigned int domId = (event->data[0] == 0x7fff) ? MAX_DOMS - 1: event->data[0];
 
+	unsigned long long lastExitToDom = get_last_exit_to_guest(event->cpu, domId);
+	long long diff = event->ns - lastExitToDom; 
+	if(diff < 0)	printf("diff -ve %llu\n", event->ns);
+	
 	list_for_each_entry(tmpDomRuntime, head, cpuList)
 	{
 		if(tmpDomRuntime->cpuId == event->cpu)
 		{
 			tmpDomRuntime->exitToXen = event->ns;
-			tmpDomRuntime->runtime[domId] += event->ns - get_last_exit_to_guest(event->cpu, domId);
+
+			tmpDomRuntime->runtime[domId] += diff;
 			return SUCCESS;
 		}
 	}
@@ -42,7 +47,6 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 	/* cpu doesn't exist or empty list.
 	 * Malloc new cpu obj and add to list.
 	 */
-	unsigned long long lastExitToDom = get_last_exit_to_guest(event->cpu, domId);
 
 	if(!lastExitToDom) lastExitToDom = event->ns;
 
