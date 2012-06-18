@@ -80,17 +80,38 @@ int num_exceptions_finalize(EventHandler *handler)
 		}
 	}
 
+	for(i = 0; i < MAX_DOMS; i++)
+	{
+		/* Free memory */
+		list_head *head = &(numExceptions[i].numVectors.vectorList);
+
+		list_for_each_entry_reverse(tmpNumVectors, head, vectorList)
+		{
+			free(tmpNumVectors);
+		}
+	}
+
 	return 0;
 }
 
 void num_exceptions_reset(void)
 {
+	NumVectors  *tmpNumVectors;
+
 	memset(numExceptions, 0, sizeof(NumExceptions)*MAX_DOMS);
 
 	int i;
 	for(i = 0; i< MAX_DOMS; i++)
 	{
 		INIT_LIST_HEAD(&(numExceptions[i].numVectors.vectorList));
+
+		/* Free memory */
+		list_head *head = &(numExceptions[i].numVectors.vectorList);
+
+		list_for_each_entry_reverse(tmpNumVectors, head, vectorList)
+		{
+			free(tmpNumVectors);
+		}
 	}
 }
 

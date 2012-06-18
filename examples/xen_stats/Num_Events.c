@@ -80,17 +80,39 @@ int num_events_finalize(EventHandler *handler)
 		}
 	}
 
+	for(i = 0; i < MAX_DOMS; i++)
+	{
+		/* Free memory */
+		list_head *head = &(numEvents[i].numPorts.portList);
+
+		list_for_each_entry_reverse(tmpNumPorts, head, portList)
+		{
+			free(tmpNumPorts);
+		}
+	}
+
+
 	return 0;
 }
 
 void num_events_reset(void)
 {
+	NumPorts  *tmpNumPorts;
+
 	memset(numEvents, 0, sizeof(NumEvents)*MAX_DOMS);
 
 	int i;
 	for(i = 0; i< MAX_DOMS; i++)
 	{
 		INIT_LIST_HEAD(&(numEvents[i].numPorts.portList));
+
+		/* Free memory */
+		list_head *head = &(numEvents[i].numPorts.portList);
+
+		list_for_each_entry_reverse(tmpNumPorts, head, portList)
+		{
+			free(tmpNumPorts);
+		}
 	}
 }
 
