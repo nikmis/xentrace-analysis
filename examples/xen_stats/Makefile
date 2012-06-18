@@ -5,6 +5,7 @@ OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
 	Num_Events.o\
+	Num_Exceptions.o\
 	Lost_records.o
 
 vpath %.h ../../include
@@ -26,6 +27,9 @@ Reader.o: Reader.c Reader.h Macros.h
 	$(CC) $(INC) -c $< -o $@
 
 Num_Events.o: Num_Events.c Num_Events.h Macros.h Externals.h
+	$(CC) $(INC) -c $< -o $@
+
+Num_Exceptions.o: Num_Exceptions.c Num_Exceptions.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h

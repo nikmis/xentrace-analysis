@@ -59,6 +59,7 @@ int num_events_finalize(EventHandler *handler)
 {
 	NumPorts  *tmpNumPorts;
 
+	printf("\nEvent Stats\n");
 	int i;
 	for(i = 0; i < MAX_DOMS; i++)
 	{
@@ -71,11 +72,11 @@ int num_events_finalize(EventHandler *handler)
 		unsigned int domId = (i == (MAX_DOMS - 1)) ? 0x7fff: i; 
 		list_head *head = &(numEvents[i].numPorts.portList);
 
-		printf("Domain %u:\n\tTotal Event Count = %llu\n", domId, numEvents[i].totalEventCount); 
+		printf("Domain %5u:\n\tTotal Event Count = %15llu\n", domId, numEvents[i].totalEventCount); 
 
 		list_for_each_entry(tmpNumPorts, head, portList)
 		{
-			printf("\t\tPort %u : Count = %u\n", tmpNumPorts->port, tmpNumPorts->totalPortCount);
+			printf("\t\tPort %4u : Count = %7u\n", tmpNumPorts->port, tmpNumPorts->totalPortCount);
 		}
 	}
 

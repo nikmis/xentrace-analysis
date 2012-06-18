@@ -5,6 +5,7 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Num_Events.h" 
+#include "Num_Exceptions.h" 
 #include "Lost_records.h"
 
 int lost_records_init(EventHandler *handler)
@@ -18,6 +19,7 @@ int lost_records_handler(EventHandler *handler, Event *event)
 	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 	{
 		num_events_reset();
+		num_exceptions_reset();
 	}
 	return SUCCESS;
 }
