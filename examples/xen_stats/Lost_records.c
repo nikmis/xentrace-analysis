@@ -8,6 +8,7 @@
 #include "Num_Exceptions.h" 
 #include "Num_Exceptions_in_xen.h" 
 #include "Num_Interrupts.h"
+#include "Num_Interrupts_in_xen.h"
 #include "Lost_records.h"
 
 int lost_records_init(EventHandler *handler)
@@ -24,6 +25,7 @@ int lost_records_handler(EventHandler *handler, Event *event)
 		num_exceptions_reset();
 		num_exceptions_in_xen_reset();
 		num_interrupts_reset();
+		num_interrupts_in_xen_reset();
 	}
 	return SUCCESS;
 }

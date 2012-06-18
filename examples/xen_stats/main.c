@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	evh_register_handler(&reader, &numExceptionsHandler);
 	evh_register_handler(&reader, &numExceptionsInXenHandler);
 	evh_register_handler(&reader, &numInterruptsHandler);
+	evh_register_handler(&reader, &numInterruptsInXenHandler);
 	evh_register_handler(&reader, &lostRecordsHandler);
 
 	reader_loop(&reader);

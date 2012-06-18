@@ -8,6 +8,7 @@ OBJS=	Event.o\
 	Num_Exceptions.o\
 	Num_Exceptions_in_xen.o\
 	Num_Interrupts.o\
+	Num_Interrupts_in_xen.o\
 	Lost_records.o
 
 vpath %.h ../../include
@@ -38,6 +39,9 @@ Num_Exceptions_in_xen.o: Num_Exceptions_in_xen.c Num_Exceptions_in_xen.h Macros.
 	$(CC) $(INC) -c $< -o $@
 
 Num_Interrupts.o: Num_Interrupts.c Num_Interrupts.h Macros.h Externals.h
+	$(CC) $(INC) -c $< -o $@
+
+Num_Interrupts_in_xen.o: Num_Interrupts_in_xen.c Num_Interrupts_in_xen.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h

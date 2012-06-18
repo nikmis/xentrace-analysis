@@ -10,5 +10,8 @@ extern struct EventHandler numExceptionsInXenHandler;
 /* Num_Interrupts */
 extern struct EventHandler numInterruptsHandler;
 
+/* Num_Interrupts_in_xen */
+extern struct EventHandler numInterruptsInXenHandler;
+
 /* Lost_records */
 extern struct EventHandler lostRecordsHandler;
