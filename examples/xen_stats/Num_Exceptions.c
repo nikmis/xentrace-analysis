@@ -57,6 +57,7 @@ int num_exceptions_handler(EventHandler *handler, Event *event)
 
 int num_exceptions_finalize(EventHandler *handler)
 {
+	unsigned int flag = 0;
 	NumVectors  *tmpNumVectors;
 
 	int i;
@@ -69,16 +70,19 @@ int num_exceptions_finalize(EventHandler *handler)
 			continue;
 		}
 
+		flag = 1;
 		unsigned int domId = (i == (MAX_DOMS - 1)) ? 0x7fff: i; 
 		list_head *head = &(numExceptions[i].numVectors.vectorList);
 
-		printf("Domain %5u:\n\tTotal Exception Count = %13llu\n", domId, numExceptions[i].totalExceptionCount); 
+		printf("  Domain %5u:\n\tTotal Exception Count = %13llu\n", domId, numExceptions[i].totalExceptionCount); 
 
 		list_for_each_entry(tmpNumVectors, head, vectorList)
 		{
 			printf("\t\tVector %4u : Count = %7u\n", tmpNumVectors->vector, tmpNumVectors->totalVectorCount);
 		}
 	}
+
+	if(!flag)	printf("\tNo Exceptions found\n");
 
 	for(i = 0; i < MAX_DOMS; i++)
 	{

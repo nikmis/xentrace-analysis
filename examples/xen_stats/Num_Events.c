@@ -57,6 +57,8 @@ int num_events_handler(EventHandler *handler, Event *event)
 
 int num_events_finalize(EventHandler *handler)
 {
+	unsigned int flag = 0;
+
 	NumPorts  *tmpNumPorts;
 
 	printf("\nEvent Stats\n");
@@ -69,16 +71,19 @@ int num_events_finalize(EventHandler *handler)
 			continue;
 		}
 
+		flag = 1;
 		unsigned int domId = (i == (MAX_DOMS - 1)) ? 0x7fff: i; 
 		list_head *head = &(numEvents[i].numPorts.portList);
 
-		printf("Domain %5u:\n\tTotal Event Count = %15llu\n", domId, numEvents[i].totalEventCount); 
+		printf("  Domain %5u:\n\tTotal Event Count = %15llu\n", domId, numEvents[i].totalEventCount); 
 
 		list_for_each_entry(tmpNumPorts, head, portList)
 		{
 			printf("\t\tPort %4u : Count = %7u\n", tmpNumPorts->port, tmpNumPorts->totalPortCount);
 		}
 	}
+
+	if(!flag)	printf("\tNo Events found\n");
 
 	for(i = 0; i < MAX_DOMS; i++)
 	{

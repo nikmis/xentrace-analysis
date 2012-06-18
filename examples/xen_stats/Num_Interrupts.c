@@ -73,7 +73,7 @@ int num_interrupts_finalize(EventHandler *handler)
 		unsigned int domId = (i == (MAX_DOMS - 1)) ? 0x7fff: i; 
 		list_head *head = &(numInterrupts[i].numVectors.vectorList);
 
-		printf("Domain %5u:\n\tTotal Interrupt Count = %13llu\n", domId, numInterrupts[i].totalInterruptCount); 
+		printf("  Domain %5u:\n\tTotal Interrupt Count = %13llu\n", domId, numInterrupts[i].totalInterruptCount); 
 
 		list_for_each_entry(tmpNumVectors, head, vectorList)
 		{
