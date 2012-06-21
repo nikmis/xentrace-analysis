@@ -4,6 +4,7 @@ INC=-I../../include
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
+	Common.o\
 	Num_Events.o\
 	Num_Exceptions.o\
 	Num_Exceptions_in_xen.o\
@@ -30,16 +31,19 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 Reader.o: Reader.c Reader.h Macros.h
 	$(CC) $(INC) -c $< -o $@
 
-Num_Events.o: Num_Events.c Num_Events.h Macros.h Externals.h
+Common.o: Common.c Common.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
-Num_Exceptions.o: Num_Exceptions.c Num_Exceptions.h Macros.h Externals.h
+Num_Events.o: Num_Events.c Common.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
-Num_Exceptions_in_xen.o: Num_Exceptions_in_xen.c Num_Exceptions_in_xen.h Macros.h Externals.h
+Num_Exceptions.o: Num_Exceptions.c Common.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
-Num_Interrupts.o: Num_Interrupts.c Num_Interrupts.h Macros.h Externals.h
+Num_Exceptions_in_xen.o: Num_Exceptions_in_xen.c Common.h Macros.h Externals.h
+	$(CC) $(INC) -c $< -o $@
+
+Num_Interrupts.o: Num_Interrupts.c Common.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 Num_Interrupts_in_xen.o: Num_Interrupts_in_xen.c Num_Interrupts_in_xen.h Macros.h Externals.h

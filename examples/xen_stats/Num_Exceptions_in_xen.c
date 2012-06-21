@@ -6,97 +6,29 @@
 #include "EventHandler.h"
 #include "Macros.h"
 #include "Trace.h"
-#include "Num_Exceptions.h"
-#include "Num_Exceptions_in_xen.h"
+#include "Common.h"
 
-NumExceptionsInXen numExceptionsInXen;
+NumEvs numExceptionsInXen;
 
 int num_exceptions_in_xen_init(EventHandler *handler)
 {
-	memset(&numExceptionsInXen, 0, sizeof(NumExceptionsInXen));
-
-	INIT_LIST_HEAD(&(numExceptionsInXen.numVectors.vectorList));
-	
-	return SUCCESS;
+	return num_ev_init(&numExceptionsInXen);	
 }
 
 
 int num_exceptions_in_xen_handler(EventHandler *handler, Event *event)
 {
-	unsigned int vector = event->data[0];
-	
-	list_head *head = &(numExceptionsInXen.numVectors.vectorList);
-	NumVectors  *tmpNumVectors;
-
-	list_for_each_entry(tmpNumVectors, head, vectorList)
-	{
-		if(tmpNumVectors->vector == vector)
-		{
-			tmpNumVectors->totalVectorCount++;
-			numExceptionsInXen.totalExceptionCount++;
-
-			return SUCCESS;
-		}
-	}
-
-	NumVectors *newNumVectors = (NumVectors *) malloc(sizeof(NumVectors));
-
-	newNumVectors->vector = vector;
-	newNumVectors->totalVectorCount = 1;	/* Init. first event for given vector */
-
-	numExceptionsInXen.totalExceptionCount++;
-
-	list_add_tail(&(newNumVectors->vectorList), head);
-
-	return SUCCESS;
+	return num_ev_in_xen_handler(&numExceptionsInXen, event);	
 }
 
 int num_exceptions_in_xen_finalize(EventHandler *handler)
 {
-	NumVectors  *tmpNumVectors;
-
-	printf("\nExecption in Xen Stats\n");
-
-	/* If no events received for domain then skip the domain */
-	if(!numExceptionsInXen.totalExceptionCount)
-	{
-		printf("\tNo Exceptions in Xen\n");
-		return SUCCESS;
-	}
-
-	list_head *head = &(numExceptionsInXen.numVectors.vectorList);
-
-	printf("\tTotal Exception in Xen Count = %13llu\n", numExceptionsInXen.totalExceptionCount); 
-
-	list_for_each_entry(tmpNumVectors, head, vectorList)
-	{
-		printf("\t\tVector %4u : Count = %7u\n", tmpNumVectors->vector, tmpNumVectors->totalVectorCount);
-	}
-
-	/* Free memory */
-	list_for_each_entry_reverse(tmpNumVectors, head, vectorList)
-	{
-		free(tmpNumVectors);
-	}
-
-	return 0;
+	return num_ev_in_xen_finalize(&numExceptionsInXen, "Exception", "Vector");
 }
 
 void num_exceptions_in_xen_reset(void)
 {
-	NumVectors  *tmpNumVectors;
-	list_head *head = &(numExceptionsInXen.numVectors.vectorList);
-
-	memset(&numExceptionsInXen, 0, sizeof(NumExceptionsInXen));
-
-	INIT_LIST_HEAD(&(numExceptionsInXen.numVectors.vectorList));
-
-	/* Free memory */
-	list_for_each_entry_reverse(tmpNumVectors, head, vectorList)
-	{
-		free(tmpNumVectors);
-	}
-
+	num_ev_in_xen_reset(&numExceptionsInXen);	
 }
 
 /* Extern Event handler struct */
