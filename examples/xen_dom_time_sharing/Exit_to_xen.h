@@ -3,7 +3,7 @@
 
 typedef struct DomRuntime
 {
-	unsigned long long 	exitToXen;
+	unsigned long long 	lastExitToXen;
 	unsigned long long 	runtime[MAX_DOMS];
 	unsigned int 		cpuId;
 	list_head		cpuList;

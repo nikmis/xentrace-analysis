@@ -15,5 +15,6 @@ int exit_to_guest_finalize(EventHandler *handler);
 void exit_to_guest_reset(void);
 
 unsigned long long get_last_exit_to_guest(unsigned int cpuId, unsigned int domId);
+unsigned long long get_latest_exit_to_guest(unsigned int cpuId);
 
 #endif

@@ -13,7 +13,7 @@ DomRuntime domRuntime;
 
 int exit_to_xen_init(EventHandler *handler)
 {
-	domRuntime.exitToXen = 0;
+	domRuntime.lastExitToXen = 0;
 	domRuntime.cpuId = 0;
 
 	memset(domRuntime.runtime, 0, sizeof(unsigned long long)*MAX_DOMS);
@@ -30,16 +30,28 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 	unsigned int domId = (event->data[0] == 0x7fff) ? MAX_DOMS - 1: event->data[0];
 
 	unsigned long long lastExitToDom = get_last_exit_to_guest(event->cpu, domId);
+	unsigned long long lastExitToXen = get_last_exit_to_xen(event->cpu);
+
 	long long diff = event->ns - lastExitToDom; 
+
 	if(diff < 0)	printf("diff -ve %llu\n", event->ns);
 	
 	list_for_each_entry(tmpDomRuntime, head, cpuList)
 	{
 		if(tmpDomRuntime->cpuId == event->cpu)
 		{
-			tmpDomRuntime->exitToXen = event->ns;
 
-			tmpDomRuntime->runtime[domId] += diff;
+			if(lastExitToXen < lastExitToDom)
+			{
+				printf("1: lastExitToXen = %llu : lastExitToGuest = %llu : domId = %5u : cpu = %u\n",
+						lastExitToXen,
+						lastExitToDom,
+						domId,
+						event->cpu);
+				tmpDomRuntime->lastExitToXen = event->ns;
+				tmpDomRuntime->runtime[domId] += diff;
+			}
+
 			return SUCCESS;
 		}
 	}
@@ -48,13 +60,20 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 	 * Malloc new cpu obj and add to list.
 	 */
 
+	printf("1: lastExitToXen = %llu : lastExitToGuest = %llu : domId = %5u : cpu = %u\n",
+			lastExitToXen,
+			lastExitToDom,
+			domId,
+			event->cpu);
 	if(!lastExitToDom) lastExitToDom = event->ns;
 
 	DomRuntime *newDomRuntime = (DomRuntime *) malloc(sizeof(DomRuntime));
 	
 	newDomRuntime->runtime[domId] = event->ns - lastExitToDom;
 	newDomRuntime->cpuId = event->cpu;
-	newDomRuntime->exitToXen = event->ns;
+
+	newDomRuntime->lastGuest = event->data[0];
+	newDomRuntime->lastExitToXen = event->ns;
 
 	list_add_tail(&(newDomRuntime->cpuList), head);
 
@@ -74,6 +93,12 @@ int exit_to_xen_finalize(EventHandler *handler)
 		int i;
 		for(i = 0; i < MAX_DOMS; i++)
 		{
+			unsigned int j = (i == MAX_DOMS - 1) ? 0x7fff : i;
+			if(tmpDomRuntime->runtime[i])
+			{
+				printf("Total time spent in Domain %5u : CPU %u = %15.3f (ms)\n", j, tmpDomRuntime->cpuId, (float)tmpDomRuntime->runtime[i]/MEGA);
+			}
+		
 			totalDomRuntime[i] += tmpDomRuntime->runtime[i];
 		}
 	}
@@ -84,7 +109,7 @@ int exit_to_xen_finalize(EventHandler *handler)
 		if(totalDomRuntime[i])
 		{
 			unsigned int j = (i == MAX_DOMS - 1) ? 0x7fff : i;
-			printf("Total time spent in Domain %5u = %15.3f (ms)\n", j, (float)totalDomRuntime[i]/MEGA);
+		//	printf("Total time spent in Domain %5u = %15.3f (ms)\n", j, (float)totalDomRuntime[i]/MEGA);
 		}
 	}
 
@@ -108,7 +133,7 @@ void exit_to_xen_reset(void)
 		free(tmpDomRuntime);
 	}
 
-	domRuntime.exitToXen = 0;
+	domRuntime.lastExitToXen = 0;
 	domRuntime.cpuId = 0;
 
 	memset(domRuntime.runtime, 0, sizeof(unsigned long long)*MAX_DOMS);
@@ -125,7 +150,7 @@ unsigned long long get_last_exit_to_xen(unsigned int cpuId)
 	{
 		if(tmpDomRuntime->cpuId == cpuId)
 		{
-			return tmpDomRuntime->exitToXen;
+			return tmpDomRuntime->lastExitToXen;
 		}
 	}
 
