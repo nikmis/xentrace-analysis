@@ -40,11 +40,13 @@ int exit_to_guest_handler(EventHandler *handler, Event *event)
 
 			if(lastExitToXen > latestExitToGuest)
 			{
+				/*
 				printf("2: lastExitToXen = %llu : lastExitToGuest = %llu : domId = %5u : cpu = %u\n",
 						lastExitToXen,
 						latestExitToGuest,
 						domId,
 						event->cpu);
+				*/
 				tmpXenRuntime->runtime += event->ns - lastExitToXen;
 				tmpXenRuntime->exitToGuest[domId] = event->ns;
 			}

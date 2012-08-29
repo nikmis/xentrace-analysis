@@ -43,11 +43,13 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 
 			if(lastExitToXen < lastExitToDom)
 			{
+				/*
 				printf("1: lastExitToXen = %llu : lastExitToGuest = %llu : domId = %5u : cpu = %u\n",
 						lastExitToXen,
 						lastExitToDom,
 						domId,
 						event->cpu);
+				*/
 				tmpDomRuntime->lastExitToXen = event->ns;
 				tmpDomRuntime->runtime[domId] += diff;
 			}
@@ -72,7 +74,6 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 	newDomRuntime->runtime[domId] = event->ns - lastExitToDom;
 	newDomRuntime->cpuId = event->cpu;
 
-	newDomRuntime->lastGuest = event->data[0];
 	newDomRuntime->lastExitToXen = event->ns;
 
 	list_add_tail(&(newDomRuntime->cpuList), head);

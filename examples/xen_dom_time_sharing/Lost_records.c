@@ -19,6 +19,7 @@ int lost_records_handler(EventHandler *handler, Event *event)
 	/* Lost records received. Clear all handler data */
 	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 	{
+		printf("Lost records at %llu\n", event->ns);
 		exit_to_guest_reset();
 		exit_to_xen_reset();
 	}
