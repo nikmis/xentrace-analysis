@@ -62,11 +62,13 @@ int exit_to_xen_handler(EventHandler *handler, Event *event)
 	 * Malloc new cpu obj and add to list.
 	 */
 
+	/*
 	printf("1: lastExitToXen = %llu : lastExitToGuest = %llu : domId = %5u : cpu = %u\n",
 			lastExitToXen,
 			lastExitToDom,
 			domId,
 			event->cpu);
+	*/
 	if(!lastExitToDom) lastExitToDom = event->ns;
 
 	DomRuntime *newDomRuntime = (DomRuntime *) malloc(sizeof(DomRuntime));

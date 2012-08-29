@@ -63,11 +63,13 @@ int exit_to_guest_handler(EventHandler *handler, Event *event)
 	 * Malloc new object and add to list.
 	 */
 
+	/*
 	printf("2: lastExitToXen = %llu : lastExitToGuest = %llu : domId = %5u : cpu = %u\n",
 			lastExitToXen,
 			latestExitToGuest,
 			domId,
 			event->cpu);
+	*/
 	if(!lastExitToXen) lastExitToXen = event->ns;
 
 	XenRuntime *newXenRuntime = (XenRuntime *) malloc(sizeof(XenRuntime));	
