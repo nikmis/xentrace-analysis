@@ -129,6 +129,32 @@
 #define TRC_SCHED_DOMU_NETBACK_STOP_SMOOTH_REPLAY (TRC_SCHED + 85)
 #define TRC_SCHED_DOMU_NETBACK_SMOOTH_REPLAY_PKT (TRC_SCHED + 86)
 
+/* Netback queues: inflight, and shared-ring */
+
+// Queue of in-fligt requests, blocked if allocation of a new request
+// fails
+#define TRC_BLKBACK_INFLIGHT_QUEUE_BLOCKED        (TRC_SCHED + 111)
+#define TRC_BLKBACK_INFLIGHT_QUEUE_UNBLOCKED      (TRC_SCHED + 112)
+
+// Shared ring queue of incoming requests, blocked when there are no 
+// new requests from the frontend
+#define TRC_BLKBACK_REQUEST_QUEUE_BLOCKED         (TRC_SCHED + 113)
+#define TRC_BLKBACK_REQUEST_QUEUE_UNBLOCKED       (TRC_SCHED + 114)
+
+// Allocation of the grant table entries may fail, and then this 
+// queue gets blocked
+#define TRC_BLKFRONT_GRANT_QUEUE_BLOCKED       (TRC_SCHED + 115)
+#define TRC_BLKFRONT_GRANT_QUEUE_UNBLOCKED     (TRC_SCHED + 116)
+
+// Shared ring queue, blocked when there is no space left in the ring
+#define TRC_BLKFRONT_SHARED_RING_QUEUE_BLOCKED    (TRC_SCHED + 117)
+#define TRC_BLKFRONT_SHARED_RING_QUEUE_UNBLOCKED  (TRC_SCHED + 118)
+
+// Requests from the elevator sheduler, the queue gets blocked when 
+// no new requests are there
+#define TRC_BLKFRONT_REQUEST_QUEUE_BLOCKED        (TRC_SCHED + 119)
+#define TRC_BLKFRONT_REQUEST_QUEUE_UNBLOCKED      (TRC_SCHED + 120)
+
 #endif /* CONFIG_TIMETRAVEL */
 
 #define TRC_MEM_PAGE_GRANT_MAP      (TRC_MEM + 1)
