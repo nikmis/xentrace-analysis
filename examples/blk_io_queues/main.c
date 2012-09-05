@@ -24,8 +24,21 @@ int main(int argc, char *argv[])
 	reader_init(&reader, argv[1]);
 
 	evh_register_handler(&reader, &lostRecordsHandler);
-	evh_register_handler(&reader, &exitToXenHandler);
-	evh_register_handler(&reader, &exitToGuestHandler);
+
+	evh_register_handler(&reader, &backInflightQueueBlockedHandler);
+	evh_register_handler(&reader, &backInflightQueueUnblockedHandler);
+
+	evh_register_handler(&reader, &backRequestQueueBlockedHandler);
+	evh_register_handler(&reader, &backRequestQueueUnblockedHandler);
+
+	evh_register_handler(&reader, &frontGrantQueueBlockedHandler);
+	evh_register_handler(&reader, &frontGrantQueueUnblockedHandler);
+
+	evh_register_handler(&reader, &frontRequestQueueBlockedHandler);
+	evh_register_handler(&reader, &frontRequestQueueUnblockedHandler);
+
+	evh_register_handler(&reader, &frontSharedRingQueueBlockedHandler);
+	evh_register_handler(&reader, &frontSharedRingQueueUnblockedHandler);
 
 	reader_loop(&reader);
 

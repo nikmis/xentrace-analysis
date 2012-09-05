@@ -27,7 +27,7 @@ void front_shared_ring_queue_blocked_reset(void)
 
 }
 
-struct EventHandler frontSharedRingQueueHandler = 
+struct EventHandler frontSharedRingQueueBlockedHandler = 
 {
 	.name = "front_shared_ring_queue_blocked",
 	.event_id = TRC_BLKFRONT_SHARED_RING_QUEUE_BLOCKED,

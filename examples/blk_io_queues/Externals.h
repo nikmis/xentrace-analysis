@@ -10,5 +10,5 @@ extern struct EventHandler frontGrantQueueUnblockedHandler;
 extern struct EventHandler frontRequestQueueBlockedHandler;
 extern struct EventHandler frontRequestQueueUnblockedHandler;
 
-extern struct EventHandler frontSharedRingQueueHandler;
+extern struct EventHandler frontSharedRingQueueBlockedHandler;
 extern struct EventHandler frontSharedRingQueueUnblockedHandler;
