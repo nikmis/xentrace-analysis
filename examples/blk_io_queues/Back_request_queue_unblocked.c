@@ -22,6 +22,11 @@ int back_request_queue_unblocked_finalize(EventHandler *handler)
 	return 0;
 }
 
+void back_request_queue_unblocked_reset(void)
+{
+
+}
+
 struct EventHandler backRequestQueueUnblockedHandler = 
 {
 	.name = "back_request_queue_unblocked",

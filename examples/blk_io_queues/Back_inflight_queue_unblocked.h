@@ -5,4 +5,6 @@ int back_inflight_queue_unblocked_init(EventHandler *handler);
 int back_inflight_queue_unblocked_handler(EventHandler *handler, Event *event);
 int back_inflight_queue_unblocked_finalize(EventHandler *handler);
 
+void back_inflight_queue_unblocked_reset(void);
+
 #endif

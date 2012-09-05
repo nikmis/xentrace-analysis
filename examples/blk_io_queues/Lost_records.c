@@ -5,8 +5,16 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
-#include "Exit_to_guest.h"
-#include "Exit_to_xen.h"
+#include "Back_inflight_queue_blocked.h"
+#include "Back_inflight_queue_unblocked.h"
+#include "Back_request_queue_blocked.h"
+#include "Back_request_queue_unblocked.h"
+#include "Front_grant_queue_blocked.h"
+#include "Front_grant_queue_unblocked.h"
+#include "Front_request_queue_blocked.h"
+#include "Front_request_queue_unblocked.h"
+#include "Front_shared_ring_queue_blocked.h"
+#include "Front_shared_ring_queue_unblocked.h"
 
 
 int lost_records_init(EventHandler *handler)
@@ -20,8 +28,6 @@ int lost_records_handler(EventHandler *handler, Event *event)
 	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 	{
 		printf("Lost records at %llu\n", event->ns);
-		exit_to_guest_reset();
-		exit_to_xen_reset();
 	}
 	return 0;
 }

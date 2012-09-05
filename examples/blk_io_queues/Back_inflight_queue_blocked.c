@@ -22,6 +22,11 @@ int back_inflight_queue_blocked_finalize(EventHandler *handler)
 	return 0;
 }
 
+void back_inflight_queue_blocked_reset(void)
+{
+
+}
+
 struct EventHandler backInflightQueueBlockedHandler = 
 {
 	.name = "back_inflight_queue_blocked",

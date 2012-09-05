@@ -22,6 +22,11 @@ int front_grant_queue_blocked_finalize(EventHandler *handler)
 	return 0;
 }
 
+void front_grant_queue_blocked_reset(void)
+{
+
+}
+
 struct EventHandler frontGrantQueueBlockedHandler = 
 {
 	.name = "front_grant_queue_blocked",

@@ -22,6 +22,11 @@ int front_request_queue_blocked_finalize(EventHandler *handler)
 	return 0;
 }
 
+void front_request_queue_blocked_reset(void)
+{
+
+}
+
 struct EventHandler frontRequestQueueBlockedHandler = 
 {
 	.name = "front_request_queue_blocked",

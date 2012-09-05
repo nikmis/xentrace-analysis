@@ -22,6 +22,11 @@ int front_shared_ring_queue_blocked_finalize(EventHandler *handler)
 	return 0;
 }
 
+void front_shared_ring_queue_blocked_reset(void)
+{
+
+}
+
 struct EventHandler frontSharedRingQueueHandler = 
 {
 	.name = "front_shared_ring_queue_blocked",

@@ -5,4 +5,6 @@ int front_shared_ring_queue_unblocked_init(EventHandler *handler);
 int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *event);
 int front_shared_ring_queue_unblocked_finalize(EventHandler *handler);
 
+void front_shared_ring_queue_unblocked_reset(void);
+
 #endif
