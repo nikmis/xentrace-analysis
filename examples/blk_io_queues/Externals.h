@@ -1,8 +1,14 @@
-/* Exit to xen */
-extern struct EventHandler exitToXenHandler;
+extern struct EventHandler backInflightQueueBlockedHandler;
+extern struct EventHandler backInflightQueueUnblockedHandler;
 
-/* Exit_to_guest */
-extern struct EventHandler exitToGuestHandler;
+extern struct EventHandler backRequestQueueBlockedHandler;
+extern struct EventHandler backRequestQueueUnblockedHandler;
 
-/* Lost_recods */
-extern struct EventHandler lostRecordsHandler;
+extern struct EventHandler frontGrantQueueBlockedHandler;
+extern struct EventHandler frontGrantQueueUnblockedHandler;
+
+extern struct EventHandler frontRequestQueueBlockedHandler;
+extern struct EventHandler frontRequestQueueUnblockedHandler;
+
+extern struct EventHandler frontSharedRingQueueHandler;
+extern struct EventHandler frontSharedRingQueueUnblockedHandler;
