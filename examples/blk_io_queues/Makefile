@@ -34,7 +34,7 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 Reader.o: Reader.c Reader.h Macros.h
 	$(CC) $(INC) -c $< -o $@
 
-Back_inflight_queue_blocked.o: Back_inflight_queue_blocked.c Back_inflight_queue_blocked.h Exit_to_guest.h Macros.h list.h Trace.h
+Back_inflight_queue_blocked.o: Back_inflight_queue_blocked.c Back_inflight_queue_blocked.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
 Back_inflight_queue_unblocked.o: Back_inflight_queue_unblocked.c Back_inflight_queue_unblocked.h Macros.h list.h Trace.h
