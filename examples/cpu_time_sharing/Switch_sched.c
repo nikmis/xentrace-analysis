@@ -110,7 +110,12 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 				}
 				else
 				{
-					fprintf(stderr, "Anomaly: Prev switched dom and vcpu don't match\n");
+					fprintf(stderr, "Anomaly: Prev switched dom and vcpu don't match: ns:%llu, prevDom: %u, dom:%u, prevVcpu:%u, vcpu:%u\n", 
+							event->ns, 
+							tmpCpuTimes->prevDomId,
+							event->data[0],
+							tmpCpuTimes->prevVcpuId,
+							event->data[1]);
 					return FAIL;
 				}
 			}
