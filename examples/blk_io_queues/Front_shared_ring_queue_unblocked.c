@@ -29,7 +29,7 @@ int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *even
 
 int front_shared_ring_queue_unblocked_finalize(EventHandler *handler)
 {
-	printf("Front Shared Ring Queue was blocked for %15.3f (ms)\n", (float)srunblockData.sharedRingWaitTime/MEGA);
+	printf("Front Shared Ring Queue was blocked for %15.3f (ms)\n\n", (float)srunblockData.sharedRingWaitTime/MEGA);
 	return 0;
 }
 
