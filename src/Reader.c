@@ -5,7 +5,9 @@
 #include "EventHandler.h"
 #include "Macros.h"
 #include "Reader.h"
+#include "CpuList.h"
 
+CpuList *cpus;
 
 void reader_init(Reader *reader, const char *filename)
 {
@@ -16,6 +18,10 @@ void reader_init(Reader *reader, const char *filename)
 		printf("Usage: ./a.out <filename>\n");
 		exit(0);
 	}
+
+	/* Init Cpu List */
+	cpus = (CpuList *) malloc(sizeof(CpuList));
+	init_cpulist(cpus);
 
 	/* Init and sort logs */
 	sort_events_by_ns(reader->fp);
@@ -42,6 +48,7 @@ void reader_exit(Reader *reader)
 
 	free(reader->handler_array);
 	free_events();
+	free_cpulist(cpus);
 
 	return;
 }
@@ -62,9 +69,13 @@ int reader_loop(Reader *reader)
 			break;
 		evh_call_handlers(reader, &event);
 
-	} while(!feof(reader->fp));
+		update_cpulist(cpus, event.cpu);
+
+	} while(!feof(reader->fp)); /* Update condition to check for sorted array not fp */
 
 	evh_call_finalizers(reader);
-	
+
+	printf("\n\nTotal time spent collecting records is %15.3f (ms) \n", (float)get_total_time(cpus)/MEGA);
+
 	return SUCCESS;
 }

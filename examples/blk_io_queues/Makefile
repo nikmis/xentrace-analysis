@@ -4,6 +4,7 @@ INC=-I../../include
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
+	CpuList.o\
 	Back_inflight_queue_blocked.o\
 	Back_inflight_queue_unblocked.o\
 	Back_request_queue_blocked.o\
@@ -32,6 +33,9 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 	$(CC) $(INC) -c $< -o $@
 
 Reader.o: Reader.c Reader.h Macros.h
+	$(CC) $(INC) -c $< -o $@
+
+CpuList.o: CpuList.c CpuList.h list.h
 	$(CC) $(INC) -c $< -o $@
 
 Back_inflight_queue_blocked.o: Back_inflight_queue_blocked.c Back_inflight_queue_blocked.h Macros.h list.h Trace.h
