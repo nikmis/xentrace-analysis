@@ -106,13 +106,15 @@ int exit_to_xen_finalize(EventHandler *handler)
 		}
 	}
 
+	printf("\n");
+
 	int i;
 	for(i = 0; i < MAX_DOMS; i++)
 	{
 		if(totalDomRuntime[i])
 		{
 			unsigned int j = (i == MAX_DOMS - 1) ? 0x7fff : i;
-		//	printf("Total time spent in Domain %5u = %15.3f (ms)\n", j, (float)totalDomRuntime[i]/MEGA);
+			printf("Total time (excluding xen runtime) spent in Domain %5u = %15.3f (ms)\n", j, (float)totalDomRuntime[i]/MEGA);
 		}
 	}
 
