@@ -16,6 +16,7 @@ int lost_records_init(EventHandler *handler)
 int lost_records_handler(EventHandler *handler, Event *event)
 {
 	/* Lost records received. Clear all handler data */
+	printf("Lost records at %llu. Time lost = %15.5f (ms)\n", event->ns, (float)(event->ns - event->lastNs)/MEGA); 
 	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 	{
 		switch_infprev_reset();

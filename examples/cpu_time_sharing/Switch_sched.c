@@ -116,7 +116,7 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 							event->data[0],
 							tmpCpuTimes->prevVcpuId,
 							event->data[1]);
-					return FAIL;
+					return SUCCESS;
 				}
 			}
 		}
@@ -162,7 +162,6 @@ int switch_sched_handler(EventHandler *handler, Event *event)
 
 	return SUCCESS;
 }
-
 
 int switch_sched_finalize(EventHandler *handler)
 {
@@ -213,13 +212,17 @@ int switch_sched_finalize(EventHandler *handler)
 
 		tmpCpuTimes = NULL;
 
-		/* Produce util by Cpus */
+		/* Produce util by Cpus.
+		 * Physical CPUx Util = (total time for CPUx - time CPUx was idle) / total time for CPUx
+		 *
+		 * */
+
 		list_for_each_entry(tmpCpuTimes, headCpuList, cpuList)
 		{
 			unsigned long long cpuUtil = tmpCpuTimes->totalCpuTime - tmpCpuTimes->domVcpuTimes[MAX_DOMS - 1].totalDomTime;
 			printf("Physcial CPU Utilization:\tCPU %d = %5.2f %%\n", 
 					tmpCpuTimes->cpuId,
-					(float)cpuUtil/totalRuntime * 100);
+					(float)cpuUtil/tmpCpuTimes->totalCpuTime * 100);
 		}
 
 		printf("\n");

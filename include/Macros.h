@@ -16,7 +16,7 @@
 /* Event Specfic Macros  */
 
 /* Lost Records */
-#define LOST_REC_MAX_TIME 1000000000
+#define LOST_REC_MAX_TIME 3000000000
 
 /* Event Ids not present in xen_tt */
 #define TRAP 		0x0020f003
