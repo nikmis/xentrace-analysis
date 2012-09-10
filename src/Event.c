@@ -170,3 +170,34 @@ int check_null(void *ev, void *fp)
 	else
 		return SUCCESS;
 }
+
+unsigned long long get_first_ns(unsigned int cpu)
+{
+	unsigned long long i;
+	if(eventList != NULL)
+	{
+		for(i = 0; i < numEvents; i++)
+		{
+			if(eventList[i].cpu == cpu)
+				return eventList[i].ns;
+		}
+	}
+
+	return 0;
+}
+
+unsigned long long get_last_ns(unsigned int cpu)
+{
+	long long i;
+
+	if(eventList != NULL)
+	{
+		for(i = numEvents - 1; i >= 0; i--)
+		{
+			if(eventList[i].cpu == cpu)
+				return eventList[i].ns;
+		}
+	}
+
+	return 0;
+}

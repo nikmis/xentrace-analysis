@@ -45,4 +45,8 @@ void clear_event(Event *);
 int return_next_event(Event *ev);
 int sort_events_by_ns(FILE *fp);
 void free_events(void);
+
+
+unsigned long long get_last_ns(unsigned int cpu);
+unsigned long long get_first_ns(unsigned int cpu);
 #endif
