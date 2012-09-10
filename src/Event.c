@@ -5,8 +5,13 @@
 #include "Event.h"
 
 static Event *eventList = NULL;
-static unsigned long eventCount = 0;
-static unsigned long numEvents = 0;
+static unsigned long long eventCount = 0;
+static unsigned long long numEvents = 0;
+
+unsigned long long get_total_event_records()
+{
+	return numEvents;
+}
 
 int compare(const void *a, const void *b)
 {
@@ -131,7 +136,11 @@ int return_next_event(Event *ev)
 		/* Keep track of last ns timestamp for lost_records check */
 		if(eventCount > 0)
 		{
-			eventList[eventCount].lastNs = eventList[eventCount - 1].ns;
+			unsigned long long i = 0;
+			while((++i < eventCount) 
+				&& (eventList[eventCount - i].cpu != eventList[eventCount].cpu));
+
+			eventList[eventCount].lastNs = eventList[eventCount - i].ns;
 		}
 		memcpy(ev, &eventList[eventCount++], sizeof(Event));
 		return SUCCESS;
