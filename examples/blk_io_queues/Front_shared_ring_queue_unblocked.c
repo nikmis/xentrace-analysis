@@ -21,7 +21,19 @@ int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *even
 {
 	unsigned long long lastSRBlockNs = get_last_srblock_ns();
 
-	srunblockData.sharedRingWaitTime += event->ns - lastSRBlockNs;
+	/* Ignore successive unblock msgs.
+	 * Can be seen during lost records.
+	 */
+	if(srunblockData.lastSRUnblockNs > lastSRBlockNs)
+	{
+		return 0;
+	}
+
+	//fprintf(stderr, "wait time %15.5f ns %llu\n", (float)(event->ns - lastSRBlockNs)/MEGA, event->ns);
+
+	if(lastSRBlockNs) /* Edge case: beginning of log, no block msg seen */
+		srunblockData.sharedRingWaitTime += event->ns - lastSRBlockNs;
+
 	srunblockData.lastSRUnblockNs = event->ns;
 
 	return 0;
