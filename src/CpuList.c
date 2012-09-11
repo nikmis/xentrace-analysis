@@ -40,21 +40,35 @@ unsigned long long get_total_time(CpuList *cpus)
 
 	list_head *head = &(cpus->cpuList);
 
+	printf("\n");
 	list_for_each_entry(tmpCpuList, head, cpuList)
 	{
 		unsigned long long tmpTime = get_last_ns(tmpCpuList->cpu) - get_first_ns(tmpCpuList->cpu);
 
-		//printf("\nTotal Time on CPU %u is %15.3f (ms)\n", tmpCpuList->cpu, (float)tmpTime/MEGA);
+		printf("Total Time on CPU %u is %15.3f (ms)\n", tmpCpuList->cpu, (float)tmpTime/MEGA);
 
-		if(totalTime < tmpTime)
-		{
-			totalTime = tmpTime;
-		}
+		totalTime += tmpTime;
 	}
 
 	return totalTime;
 }
 
+unsigned long long get_total_time_cpu(CpuList *cpus, unsigned int cpu)
+{
+	CpuList *tmpCpuList;
+
+	list_head *head = &(cpus->cpuList);
+
+	list_for_each_entry(tmpCpuList, head, cpuList)
+	{
+		if(tmpCpuList->cpu == cpu)
+		{
+			return (get_last_ns(tmpCpuList->cpu) - get_first_ns(tmpCpuList->cpu));
+		}
+	}
+
+	return 0;
+}
 void free_cpulist(CpuList *cpus)
 {
 	CpuList *tmpCpuList;

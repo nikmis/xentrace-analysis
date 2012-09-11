@@ -75,8 +75,8 @@ int reader_loop(Reader *reader)
 
 	evh_call_finalizers(reader);
 
-	printf("\n\nTotal time spent collecting records is %15.3f (ms) \n", (float)get_total_time(cpus)/MEGA);
-	printf("Total event records collected = %llu\n", get_total_event_records());
+	printf("\nTotal CPU time spent collecting records is %15.3f (ms) \n", (float)get_total_time(cpus)/MEGA);
+	printf("\nTotal event records collected = %llu\n", get_total_event_records());
 
 	return SUCCESS;
 }
