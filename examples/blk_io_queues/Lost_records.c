@@ -32,19 +32,25 @@ int lost_records_handler(EventHandler *handler, Event *event)
 {
 	/* Lost records received. Clear all handler data */
 	lostRecCount++;
-	totalLostRec += event->data[0];
-	totalLostTime += (event->ns - event->lastNs);
 
-	if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
+	if(event->lastNs)
 	{
-		printf("CPU: %u : Lost records at %llu : Time Lost = %15.3f (ms)\n", event->cpu, event->ns, (float)(event->ns - event->lastNs)/MEGA);
+		totalLostTime += (event->ns - event->lastNs);
+		totalLostRec += event->data[0];
+
+		if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
+		{
+			printf("CPU: %u : Lost records at %llu : Time Lost = %15.3f (ms)\n", event->cpu, event->ns, (float)(event->ns - event->lastNs)/MEGA);
+		}
 	}
 	return 0;
 }
 
 int lost_records_finalize(EventHandler *handler)
 {
-	printf("\nlost_record occurences = %5u\nTotal lost_records = %10llu\nTotal lost time = %15.3f (ms)\n\n", 
+	printf("\nlost_record occurences = %u\n"
+		 "Total lost_records     = %llu\n"
+		 "Total lost time        = %.3f (ms)\n\n", 
 			lostRecCount, totalLostRec, (float)totalLostTime/MEGA);
 	return 0;
 }

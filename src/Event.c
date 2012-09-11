@@ -201,7 +201,7 @@ unsigned long long get_last_ns(unsigned int cpu)
 
 	if(eventList != NULL)
 	{
-		for(i = numEvents - 1; i >= 0; i--)
+		for(i = numEvents - 1; i != 0; i--)
 		{
 			if(eventList[i].cpu == cpu)
 				return eventList[i].ns;
