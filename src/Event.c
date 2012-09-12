@@ -211,3 +211,9 @@ unsigned long long get_last_ns(unsigned int cpu)
 
 	return 0;
 }
+
+void print_line(void)
+{
+	printf("==================================================================\n");
+}
+

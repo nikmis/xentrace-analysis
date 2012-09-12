@@ -50,4 +50,6 @@ unsigned long long get_total_event_records();
 unsigned long long get_last_ns(unsigned int cpu);
 unsigned long long get_first_ns(unsigned int cpu);
 
+void print_line(void);
+
 #endif
