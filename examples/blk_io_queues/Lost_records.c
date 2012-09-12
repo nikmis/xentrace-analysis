@@ -53,10 +53,11 @@ int lost_records_handler(EventHandler *handler, Event *event)
 				{
 					tmpLrt->totalLostTime += (event->ns - event->lastNs);
 					tmpLrt->totalLostRec += event->data[0];
+					
 					printf("CPU: %u : Lost records at %llu : Time Lost = %15.3f (ms)\n", 
 							event->cpu, event->ns, 
 							(float)(event->ns - event->lastNs)/MEGA);
-
+					
 				}
 				
 			}
@@ -67,21 +68,32 @@ int lost_records_handler(EventHandler *handler, Event *event)
 
 int lost_records_finalize(EventHandler *handler)
 {
-	printf("\nlost_record occurences = %u\n", lostRecCount);
+	printf("Lost records data\n");
+	print_line();
+	printf("\nTotal lost_record occurences = %u\n", lostRecCount);
 
 	LostRecTime *tmpLrt;
 
 	list_head *head = &(lostRecTime.cpuList);
 
+	unsigned long long avgTime = get_avg_total_time();
+
 	unsigned long long totalCPULostTime = 0;
 	list_for_each_entry(tmpLrt, head, cpuList)
 	{
 		totalCPULostTime += tmpLrt->totalLostTime;
-		 printf("CPU %u : Total lost_records = %llu : Total lost time = %10.3f(ms)\n",
+		printf("CPU %u : Total lost_records = %llu : Total lost time = %10.3f(ms)",
 			tmpLrt->cpu, tmpLrt->totalLostRec, (float)tmpLrt->totalLostTime/MEGA);
+
+		if(avgTime)
+		{
+			printf(" or %3.2f %%", (float)tmpLrt->totalLostTime/avgTime * 100);
+		}
+		printf("\n");
 	}
 			
 	printf("Total lost time  = %10.3f (ms)\n\n", (float)totalCPULostTime/MEGA);
+	print_line();
 
 	free_lrt_cpulist();
 
