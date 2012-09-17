@@ -20,16 +20,25 @@ int front_shared_ring_queue_blocked_init(EventHandler *handler)
 int front_shared_ring_queue_blocked_handler(EventHandler *handler, Event *event)
 {
 	unsigned long long lastSRUnblockNs = get_last_srunblock_ns();
+	unsigned long long lastLostRecordNs = get_last_lost_records_ns(event->cpu);
 
-	if(lastSRUnblockNs < srblockData.lastSRBlockNs)
+	/* If lost_rec seen before the last block msg
+	 * no need to reset srblockData.lastSRBlockNs
+	 */
+	if(lastLostRecordNs < srblockData.lastSRBlockNs)
 	{
-		/* Successive Block msgs, w/o an unblock msg.
-		 * Ignore the latest blocked queue event.
-		 * */
-		return 0;
+		if(lastSRUnblockNs < srblockData.lastSRBlockNs)
+		{
+			/* Successive Block msgs, w/o an unblock msg.
+			 * Ignore the latest blocked queue event.
+			 * */
+			fprintf(stderr, "ignoring block msg %llu\n", event->ns);
+			return 0;
+		}
 	}
 
-	/* Seeing a SR block msg 1st time, after an unblock msg */	
+	/* Seeing a SR block msg 1st time, after an unblock msg,
+	 * or encountered a lost_rec event. */
 	srblockData.lastSRBlockNs = event->ns;
 
 	return 0;

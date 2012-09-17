@@ -20,12 +20,15 @@ int front_shared_ring_queue_unblocked_init(EventHandler *handler)
 int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *event)
 {
 	unsigned long long lastSRBlockNs = get_last_srblock_ns();
+	unsigned long long lastLostRecordNs = get_last_lost_records_ns(event->cpu);
 
 	/* Ignore successive unblock msgs.
-	 * Can be seen during lost records.
+	 * Can also be seen during lost records.
 	 */
-	if(srunblockData.lastSRUnblockNs > lastSRBlockNs)
+	if(	(lastLostRecordNs > lastSRBlockNs) ||
+		(srunblockData.lastSRUnblockNs > lastSRBlockNs))
 	{
+		fprintf(stderr, "ignoring unblock msg %llu\n", event->ns);
 		return 0;
 	}
 

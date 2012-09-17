@@ -28,6 +28,7 @@ int lost_records_init(EventHandler *handler)
 	lostRecTime.totalLostRec = 0;
 	lostRecTime.totalLostTime = 0;
 	lostRecTime.cpu = 0;
+	lostRecTime.lastNs = 0;
 
 	INIT_LIST_HEAD(&(lostRecTime.cpuList));
 
@@ -42,24 +43,24 @@ int lost_records_handler(EventHandler *handler, Event *event)
 
 	if(event->lastNs)
 	{
-		if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
-		{
-			LostRecTime *tmpLrt;
-			list_head *head = &(lostRecTime.cpuList);
+		LostRecTime *tmpLrt;
+		list_head *head = &(lostRecTime.cpuList);
 
-			list_for_each_entry(tmpLrt, head, cpuList)
+		list_for_each_entry(tmpLrt, head, cpuList)
+		{
+			if(tmpLrt->cpu == event->cpu)
 			{
-				if(tmpLrt->cpu == event->cpu)
+				tmpLrt->totalLostTime += (event->ns - event->lastNs);
+				tmpLrt->totalLostRec += event->data[0];
+				tmpLrt->lastNs = event->ns;
+
+				if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 				{
-					tmpLrt->totalLostTime += (event->ns - event->lastNs);
-					tmpLrt->totalLostRec += event->data[0];
-					
 					printf("CPU: %u : Lost records at %llu : Time Lost = %15.3f (ms)\n", 
 							event->cpu, event->ns, 
 							(float)(event->ns - event->lastNs)/MEGA);
-					
 				}
-				
+
 			}
 		}
 	}
@@ -100,6 +101,26 @@ int lost_records_finalize(EventHandler *handler)
 	return 0;
 }
 
+unsigned long long get_last_lost_records_ns(unsigned int cpu)
+{
+	LostRecTime *tmpLrt;
+
+	list_head *head = &(lostRecTime.cpuList);
+
+	if(!list_empty(head))
+	{
+		list_for_each_entry(tmpLrt, head, cpuList)
+		{
+			if(tmpLrt->cpu == cpu)
+			{
+				return tmpLrt->lastNs;
+			}
+		}
+	}
+
+	return 0;
+}
+
 void update_lrt_cpulist(unsigned int cpu)
 {
 	LostRecTime *tmpLrt;
@@ -124,6 +145,7 @@ void update_lrt_cpulist(unsigned int cpu)
 	
 	newLrt->totalLostRec = 0;
 	newLrt->totalLostTime = 0;
+	newLrt->lastNs = 0;
 
 	list_add_tail(&(newLrt->cpuList), head);
 }
