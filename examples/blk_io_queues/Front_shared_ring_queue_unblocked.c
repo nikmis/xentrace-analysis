@@ -23,12 +23,37 @@ int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *even
 	unsigned long long lastLostRecordNs = get_last_lost_records_ns(event->cpu);
 
 	/* Ignore successive unblock msgs.
-	 * Can also be seen during lost records.
+	 * Can also appear successive due to lost records.
+	 *
+	 *	   SCENARIOS
+	 * last_block	| last_unblock
+	 * 	.	|	.
+	 * 	.	|	.
+	 * lost_rec	| last_block
+	 * 	.	|	. 
+	 * 	.	|	.
+	 * last_unblock	| lost_rec
+	 * 	.	|	.
+	 * unblock	| unblock
 	 */
 	if(	(lastLostRecordNs > lastSRBlockNs) ||
 		(srunblockData.lastSRUnblockNs > lastSRBlockNs))
 	{
-		fprintf(stderr, "ignoring unblock msg %llu\n", event->ns);
+		/* Incase you have a lost_rec betn 2 unblock/block events */
+		if(lastLostRecordNs > srunblockData.lastSRUnblockNs)
+		{
+			/*
+			fprintf(stderr, "lost_rec > unblock ns:%llu diff:%llu lost:%llu bns:%llu uns%llu\n", 
+					event->ns, 
+					event->ns - lastLostRecordNs,
+					lastLostRecordNs,
+					lastSRBlockNs,
+					srunblockData.lastSRUnblockNs);
+					*/
+			srunblockData.sharedRingWaitTime += event->ns - lastLostRecordNs;
+			srunblockData.lastSRUnblockNs = event->ns;
+		}
+
 		return 0;
 	}
 
