@@ -20,8 +20,16 @@ int back_request_queue_blocked_init(EventHandler *handler)
 int back_request_queue_blocked_handler(EventHandler *handler, Event *event)
 {
 	unsigned long long lastRQUnblockNs = get_last_back_rqunblock_ns();
+	unsigned long long lastLostRecordNs = get_last_lost_records_ns(event->cpu);
 
-	backRQBlockData.backRQBlockWaitTime += event->ns - lastRQUnblockNs;
+	unsigned long long tmpNs = lastRQUnblockNs;
+
+	if((lastLostRecordNs > lastRQUnblockNs) && (lastLostRecordNs > backRQBlockData.lastRQBlockNs))
+	{
+		tmpNs = lastLostRecordNs;
+	}
+
+	backRQBlockData.backRQBlockWaitTime += event->ns - tmpNs;
 	backRQBlockData.lastRQBlockNs = event->ns;
 
 	return 0;

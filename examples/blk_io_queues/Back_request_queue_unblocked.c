@@ -19,15 +19,29 @@ int back_request_queue_unblocked_init(EventHandler *handler)
 int back_request_queue_unblocked_handler(EventHandler *handler, Event *event)
 {
 	unsigned long long lastBackRQBlockNs = get_last_back_rqblock_ns();
+	unsigned long long lastLostRecordNs = get_last_lost_records_ns(event->cpu);
 
-	if(lastBackRQUnblockNs > lastBackRQBlockNs)
+	/* 		SCENARIOS
+	 * last_block	| last_block	| last_unblock
+	 * 	.	|	.	|	.
+	 * last_unblock	| lost_rec	| lost_rec
+	 * 	.	|	.	|	.
+	 * 	.	|	.	|	.
+	 * lost_rec	| last_unblock	| last_block
+	 * 	.	|	.	|	.
+	 * unblock	| unblock	| unblock
+	 */
+	if( !((lastLostRecordNs > lastBackRQUnblockNs) && (lastLostRecordNs > lastBackRQBlockNs)) ) 
 	{
-		/* Successive Unblock events, w/o a block event.
-		 * Ignore latest Unblock event.
-		 */
-		return 0;
+		if(lastBackRQUnblockNs > lastBackRQBlockNs)
+		{
+			/* Successive Unblock events, w/o a block event.
+			 * Ignore latest Unblock event.
+			 */
+			return 0;
+		}
 	}
-
+	
 	lastBackRQUnblockNs = event->ns;
 
 	return 0;

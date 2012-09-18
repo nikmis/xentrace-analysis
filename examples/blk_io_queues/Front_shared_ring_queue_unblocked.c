@@ -50,6 +50,10 @@ int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *even
 					lastSRBlockNs,
 					srunblockData.lastSRUnblockNs);
 					*/
+
+			/* Since we don't know when exactly a block event occured last due to lost_rec,
+			 * we add the time between lost_rec and the 1st unblock event after.
+			 */
 			srunblockData.sharedRingWaitTime += event->ns - lastLostRecordNs;
 			srunblockData.lastSRUnblockNs = event->ns;
 		}
