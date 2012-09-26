@@ -29,7 +29,10 @@ int back_request_queue_blocked_handler(EventHandler *handler, Event *event)
 		tmpNs = lastLostRecordNs;
 	}
 
-	backRQBlockData.backRQBlockWaitTime += event->ns - tmpNs;
+	//fprintf(stderr, "back_req: ns = %llu, tmpNs = %llu, diff = %llu\n", event->ns, tmpNs, event->ns - tmpNs);
+	if(tmpNs)
+		backRQBlockData.backRQBlockWaitTime += event->ns - tmpNs;
+
 	backRQBlockData.lastRQBlockNs = event->ns;
 
 	return 0;

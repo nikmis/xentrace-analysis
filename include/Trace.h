@@ -33,6 +33,8 @@
 #define TRC_DOM0OP  0x0004f000    /* Xen DOM0 operation trace */
 #define TRC_HVM     0x0008f000    /* Xen HVM trace            */
 #define TRC_MEM     0x0010f000    /* Xen memory trace         */
+#define TRC_XA_XEN  0x0020f000    /* Low-level transitions between guests and Xen */
+#define TRC_XA_BLK  0x0040f000    /* Events from the block devices  */
 #define TRC_ALL     0xfffff000
 
 /* Trace subclasses */
@@ -61,6 +63,18 @@
 #define TRC_SCHED_SWITCH_INFPREV (TRC_SCHED + 14)
 #define TRC_SCHED_SWITCH_INFNEXT (TRC_SCHED + 15)
 
+#define TRC_EVENT                                (TRC_XA_XEN + 1)
+#define TRC_EXIT_TO_GUEST                        (TRC_XA_XEN + 2)
+#define TRC_EXIT_TO_XEN                          (TRC_XA_XEN + 3)
+#define TRC_EXCEPTION                            (TRC_XA_XEN + 4)
+#define TRC_EXCEPTION_IN_XEN                     (TRC_XA_XEN + 5)
+#define TRC_INTERRUPT                            (TRC_XA_XEN + 6)
+#define TRC_INTERRUPT_IN_XEN                     (TRC_XA_XEN + 7)
+#define TRC_HYPERCALL                            (TRC_XA_XEN + 8)
+#define TRC_EXIT_TO_XEN_NO_VCPU                  (TRC_XA_XEN + 9)
+#define TRC_IRQ                                  (TRC_XA_XEN + 10)
+
+/*
 #define TRC_EVENT				(TRC_SCHED + 101)
 #define TRC_EXIT_TO_GUEST			(TRC_SCHED + 102)
 #define TRC_EXIT_TO_XEN				(TRC_SCHED + 103)
@@ -69,32 +83,34 @@
 #define TRC_INTERRUPT				(TRC_SCHED + 106)
 #define TRC_INTERRUPT_IN_XEN			(TRC_SCHED + 107)
 #define TRC_HYPERCALL				(TRC_SCHED + 108) 
-
+*/
 /* Netback queues: inflight, and shared-ring */
 
 // Queue of in-fligt requests, blocked if allocation of a new request
 // fails
-#define TRC_BLKBACK_INFLIGHT_QUEUE_BLOCKED        (TRC_SCHED + 111)
-#define TRC_BLKBACK_INFLIGHT_QUEUE_UNBLOCKED      (TRC_SCHED + 112)
+
+#define TRC_BLKBACK_INFLIGHT_QUEUE_BLOCKED        (TRC_XA_BLK + 1)
+#define TRC_BLKBACK_INFLIGHT_QUEUE_UNBLOCKED      (TRC_XA_BLK + 2)
 
 // Shared ring queue of incoming requests, blocked when there are no 
 // new requests from the frontend
-#define TRC_BLKBACK_REQUEST_QUEUE_BLOCKED         (TRC_SCHED + 113)
-#define TRC_BLKBACK_REQUEST_QUEUE_UNBLOCKED       (TRC_SCHED + 114)
+#define TRC_BLKBACK_REQUEST_QUEUE_BLOCKED         (TRC_XA_BLK + 3)
+#define TRC_BLKBACK_REQUEST_QUEUE_UNBLOCKED       (TRC_XA_BLK + 4)
 
 // Allocation of the grant table entries may fail, and then this 
 // queue gets blocked
-#define TRC_BLKFRONT_GRANT_QUEUE_BLOCKED       (TRC_SCHED + 115)
-#define TRC_BLKFRONT_GRANT_QUEUE_UNBLOCKED     (TRC_SCHED + 116)
+#define TRC_BLKFRONT_GRANT_QUEUE_BLOCKED       (TRC_XA_BLK + 5)
+#define TRC_BLKFRONT_GRANT_QUEUE_UNBLOCKED     (TRC_XA_BLK + 6)
 
 // Shared ring queue, blocked when there is no space left in the ring
-#define TRC_BLKFRONT_SHARED_RING_QUEUE_BLOCKED    (TRC_SCHED + 117)
-#define TRC_BLKFRONT_SHARED_RING_QUEUE_UNBLOCKED  (TRC_SCHED + 118)
+#define TRC_BLKFRONT_SHARED_RING_QUEUE_BLOCKED    (TRC_XA_BLK + 7)
+#define TRC_BLKFRONT_SHARED_RING_QUEUE_UNBLOCKED  (TRC_XA_BLK + 8)
 
 // Requests from the elevator sheduler, the queue gets blocked when 
 // no new requests are there
-#define TRC_BLKFRONT_REQUEST_QUEUE_BLOCKED        (TRC_SCHED + 119)
-#define TRC_BLKFRONT_REQUEST_QUEUE_UNBLOCKED      (TRC_SCHED + 120)
+#define TRC_BLKFRONT_REQUEST_QUEUE_BLOCKED        (TRC_XA_BLK + 9)
+#define TRC_BLKFRONT_REQUEST_QUEUE_UNBLOCKED      (TRC_XA_BLK + 10)
+
 
 #ifdef CONFIG_TIMETRAVEL
 #define TRC_SCHED_START_TIME_DILATE    (TRC_SCHED + 32)
