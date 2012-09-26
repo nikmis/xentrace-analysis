@@ -5,6 +5,7 @@ OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
 	CpuList.o\
+	Queue_state.o\
 	Back_inflight_queue_blocked.o\
 	Back_inflight_queue_unblocked.o\
 	Back_request_queue_blocked.o\
@@ -22,7 +23,7 @@ vpath %.h .
 vpath %.c ../../src
 vpath %.c .
 
-all: main.c $(OBJS) Macros.h Externals.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h
+all: main.c $(OBJS) Macros.h Externals.h Queue_state.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h
 	$(CC) $(INC) $<  $(OBJS) -o ../../test/blk_queue_io.out	
 	rm -f *.o
 
@@ -38,37 +39,40 @@ Reader.o: Reader.c Reader.h Macros.h
 CpuList.o: CpuList.c CpuList.h list.h
 	$(CC) $(INC) -c $< -o $@
 
-Back_inflight_queue_blocked.o: Back_inflight_queue_blocked.c Back_inflight_queue_blocked.h Macros.h list.h Trace.h
+Queue_state.o: Queue_state.c Queue_state.h Lost_records.h Event.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Back_inflight_queue_unblocked.o: Back_inflight_queue_unblocked.c Back_inflight_queue_unblocked.h Macros.h list.h Trace.h
+Back_inflight_queue_blocked.o: Back_inflight_queue_blocked.c Back_inflight_queue_blocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Back_request_queue_blocked.o: Back_request_queue_blocked.c Back_request_queue_blocked.h Macros.h list.h Trace.h
+Back_inflight_queue_unblocked.o: Back_inflight_queue_unblocked.c Back_inflight_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Back_request_queue_unblocked.o: Back_request_queue_unblocked.c Back_request_queue_unblocked.h Macros.h list.h Trace.h
+Back_request_queue_blocked.o: Back_request_queue_blocked.c Back_request_queue_blocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_grant_queue_blocked.o: Front_grant_queue_blocked.c Front_grant_queue_blocked.h Macros.h list.h Trace.h
+Back_request_queue_unblocked.o: Back_request_queue_unblocked.c Back_request_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_grant_queue_unblocked.o: Front_grant_queue_unblocked.c Front_grant_queue_unblocked.h Macros.h list.h Trace.h
+Front_grant_queue_blocked.o: Front_grant_queue_blocked.c Front_grant_queue_blocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_request_queue_blocked.o: Front_request_queue_blocked.c Front_request_queue_blocked.h Macros.h list.h Trace.h
+Front_grant_queue_unblocked.o: Front_grant_queue_unblocked.c Front_grant_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_request_queue_unblocked.o: Front_request_queue_unblocked.c Front_request_queue_unblocked.h Macros.h list.h Trace.h
+Front_request_queue_blocked.o: Front_request_queue_blocked.c Front_request_queue_blocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_shared_ring_queue_blocked.o: Front_shared_ring_queue_blocked.c Front_shared_ring_queue_blocked.h Macros.h list.h Trace.h
+Front_request_queue_unblocked.o: Front_request_queue_unblocked.c Front_request_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_shared_ring_queue_unblocked.o: Front_shared_ring_queue_unblocked.c Front_shared_ring_queue_unblocked.h Macros.h list.h Trace.h
+Front_shared_ring_queue_blocked.o: Front_shared_ring_queue_blocked.c Front_shared_ring_queue_blocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h
+Front_shared_ring_queue_unblocked.o: Front_shared_ring_queue_unblocked.c Front_shared_ring_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
+	$(CC) $(INC) -c $< -o $@
+
+Lost_records.o: Lost_records.c Lost_records.h Queue_state.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 clean: 

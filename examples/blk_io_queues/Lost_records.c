@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Event.h"
-#include "EventHandler.h"
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
-/* For reset methods */
+/* For reset methods 
 #include "Back_inflight_queue_blocked.h"
 #include "Back_inflight_queue_unblocked.h"
 #include "Back_request_queue_blocked.h"
@@ -17,7 +15,7 @@
 #include "Front_request_queue_unblocked.h"
 #include "Front_shared_ring_queue_blocked.h"
 #include "Front_shared_ring_queue_unblocked.h"
-
+*/
 unsigned lostRecCount;
 LostRecTime lostRecTime;
 
@@ -104,7 +102,7 @@ int lost_records_finalize(EventHandler *handler)
 	return 0;
 }
 
-unsigned long long get_last_lost_records_ns_2(unsigned int cpu)
+unsigned long long get_ev_before_lost_records_ns(unsigned int cpu)
 {
 	LostRecTime *tmpLrt;
 
