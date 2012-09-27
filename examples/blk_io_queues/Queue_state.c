@@ -73,7 +73,6 @@ void queue_update_state_init(QueueState *qst, Message msg, Event *ev)
 	}
 
 	qst->lastNs = ev->ns;
-	fprintf(stderr, "q init: ns:%llu state:%u blocked:%llu\n", qst->lastNs, qst->state, qst->totalBlockedTime);
 }
 
 void queue_update_state_blocked(QueueState *qst, Message msg, Event *ev)
@@ -99,8 +98,12 @@ void queue_update_state_blocked(QueueState *qst, Message msg, Event *ev)
 			{
 				qst->state = UNKNOWN;
 				Time lastEvNs = get_ev_before_lost_records_ns(ev->cpu);
-				qst->totalBlockedTime += lastEvNs - qst->lastNs;
-				qst->totalTime += lastEvNs - qst->lastNs;
+
+				if(lastEvNs)
+				{
+					qst->totalBlockedTime += lastEvNs - qst->lastNs;
+					qst->totalTime += lastEvNs - qst->lastNs;
+				}
 				break;
 			}
 			else
@@ -137,7 +140,7 @@ void queue_update_state_unblocked(QueueState *qst, Message msg, Event *ev)
 
 				if(lastEvNs)
 				{
-					qst->totalBlockedTime += lastEvNs - qst->lastNs;
+					qst->totalUnblockedTime += lastEvNs - qst->lastNs;
 					qst->totalTime += lastEvNs - qst->lastNs;
 				}
 				break;
@@ -157,12 +160,12 @@ void queue_update_state_unknown(QueueState *qst, Message msg, Event *ev)
 	{
 		case Q_BLOCKED:
 			qst->state = BLOCKED;
-			qst->totalBlockedTime += ev->ns - qst->lastNs;
+			qst->totalUnblockedTime += ev->ns - qst->lastNs;
 			qst->totalTime += ev->ns - qst->lastNs;
 			break;
 		case Q_UNBLOCKED:
 			qst->state = UNBLOCKED;
-			qst->totalUnblockedTime += ev->ns - qst->lastNs;
+			qst->totalBlockedTime += ev->ns - qst->lastNs;
 			qst->totalTime += ev->ns - qst->lastNs;
 			break;
 		case LOST_REC:

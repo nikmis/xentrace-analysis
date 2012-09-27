@@ -6,52 +6,39 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
+#include "Queue_state.h"
 #include "Back_request_queue_blocked.h"
 #include "Back_request_queue_unblocked.h"
 
-BackRQBlockData backRQBlockData;
+extern QueueState *BackRQueue;
 
 int back_request_queue_blocked_init(EventHandler *handler)
 {
-	memset(&backRQBlockData, 0, sizeof(BackRQBlockData));
+	if(BackRQueue == NULL)
+	{
+		queue_init_state(&BackRQueue);
+	}
+
 	return 0;
 }
 
 int back_request_queue_blocked_handler(EventHandler *handler, Event *event)
 {
-	unsigned long long lastRQUnblockNs = get_last_back_rqunblock_ns();
-	unsigned long long lastLostRecordNs = get_last_lost_records_ns(event->cpu);
-
-	unsigned long long tmpNs = lastRQUnblockNs;
-
-	if((lastLostRecordNs > lastRQUnblockNs) && (lastLostRecordNs > backRQBlockData.lastRQBlockNs))
-	{
-		tmpNs = lastLostRecordNs;
-	}
-
-	//fprintf(stderr, "back_req: ns = %llu, tmpNs = %llu, diff = %llu\n", event->ns, tmpNs, event->ns - tmpNs);
-	if(tmpNs)
-		backRQBlockData.backRQBlockWaitTime += event->ns - tmpNs;
-
-	backRQBlockData.lastRQBlockNs = event->ns;
+	queue_update_state(BackRQueue, Q_BLOCKED, event);
 
 	return 0;
 }
 
 int back_request_queue_blocked_finalize(EventHandler *handler)
 {
-	printf("\nBack Request Queue is unblocked for %15.3f (ms) \n\n", (float)backRQBlockData.backRQBlockWaitTime/MEGA);
+	printf("\nBack Request Queue is unblocked for %15.3f (ms) \n\n", 
+			(float)queue_unblocked_time(BackRQueue)/MEGA);
 	return 0;
 }
 
 void back_request_queue_blocked_reset(void)
 {
-	memset(&backRQBlockData, 0, sizeof(BackRQBlockData));
-}
-
-unsigned long long get_last_back_rqblock_ns()
-{
-	return backRQBlockData.lastRQBlockNs;
+	queue_free_state(&BackRQueue);
 }
 
 struct EventHandler backRequestQueueBlockedHandler = 
