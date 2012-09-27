@@ -23,6 +23,7 @@ typedef enum
 
 typedef struct QueueState
 {
+	int cpus;
 	State state;
 	Time lastNs;
 	Time totalBlockedTime;
@@ -34,6 +35,10 @@ typedef struct QueueState
 int queue_init_state(QueueState **qst);
 int queue_update_state(QueueState *qst, Message msg, Event *ev);
 void queue_free_state(QueueState **qst);
+
+Time queue_unblocked_time(QueueState *qst);
+Time queue_blocked_time(QueueState *qst);
+Time queue_total_time(QueueState *qst);
 
 /* Internally used only*/
 void queue_update_state_init(QueueState *qst, Message msg, Event *ev);

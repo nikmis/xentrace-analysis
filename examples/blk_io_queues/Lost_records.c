@@ -4,18 +4,11 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
-/* For reset methods 
-#include "Back_inflight_queue_blocked.h"
-#include "Back_inflight_queue_unblocked.h"
-#include "Back_request_queue_blocked.h"
-#include "Back_request_queue_unblocked.h"
-#include "Front_grant_queue_blocked.h"
-#include "Front_grant_queue_unblocked.h"
-#include "Front_request_queue_blocked.h"
-#include "Front_request_queue_unblocked.h"
-#include "Front_shared_ring_queue_blocked.h"
+#include "Queue_state.h"
 #include "Front_shared_ring_queue_unblocked.h"
-*/
+
+extern QueueState *FrontSRQueue;
+
 unsigned lostRecCount;
 LostRecTime lostRecTime;
 
@@ -36,6 +29,9 @@ int lost_records_init(EventHandler *handler)
 
 int lost_records_handler(EventHandler *handler, Event *event)
 {
+	/* Queue specific handling */
+	queue_update_state(FrontSRQueue, LOST_REC, event); 
+
 	/* Lost records received. Clear all handler data */
 	lostRecCount++;
 	update_lrt_cpulist(event->cpu);

@@ -66,13 +66,13 @@ Front_request_queue_blocked.o: Front_request_queue_blocked.c Front_request_queue
 Front_request_queue_unblocked.o: Front_request_queue_unblocked.c Front_request_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_shared_ring_queue_blocked.o: Front_shared_ring_queue_blocked.c Front_shared_ring_queue_blocked.h Queue_state.h Macros.h list.h Trace.h
+Front_shared_ring_queue_blocked.o: Front_shared_ring_queue_blocked.c Front_shared_ring_queue_blocked.h Queue_state.c Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Front_shared_ring_queue_unblocked.o: Front_shared_ring_queue_unblocked.c Front_shared_ring_queue_unblocked.h Queue_state.h Macros.h list.h Trace.h
+Front_shared_ring_queue_unblocked.o: Front_shared_ring_queue_unblocked.c Front_shared_ring_queue_unblocked.h Queue_state.c Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
-Lost_records.o: Lost_records.c Lost_records.h Queue_state.h Macros.h Externals.h
+Lost_records.o: Lost_records.c Lost_records.h Front_shared_ring_queue_unblocked.c Queue_state.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 clean: 
