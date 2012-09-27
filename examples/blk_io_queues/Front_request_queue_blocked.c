@@ -6,41 +6,39 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
+#include "Queue_state.h"
 #include "Front_request_queue_blocked.h"
 #include "Front_request_queue_unblocked.h"
 
-RQBlockData rqblockData;
+QueueState *FrontRQueue;
 
 int front_request_queue_blocked_init(EventHandler *handler)
 {
-	memset(&rqblockData, 0, sizeof(RQBlockData));
+	if(FrontRQueue == NULL)
+	{
+		queue_init_state(&FrontRQueue);
+	}
+
 	return 0;
 }
 
 int front_request_queue_blocked_handler(EventHandler *handler, Event *event)
 {
-	unsigned long long lastRQUnblockNs = get_last_rqunblock_ns();
-
-	rqblockData.requestQueueWaitTime += event->ns - lastRQUnblockNs;
-	rqblockData.lastRQBlockNs = event->ns;
+	queue_update_state(FrontRQueue, Q_BLOCKED, event);
 
 	return 0;
 }
 
 int front_request_queue_blocked_finalize(EventHandler *handler)
 {
-	printf("Front Request Queue was unblocked for %15.3f (ms)\n\n", (float)rqblockData.requestQueueWaitTime/MEGA);
+	printf("Front Request Queue was unblocked for %15.3f (ms)\n\n", 
+			(float)queue_unblocked_time(FrontRQueue)/MEGA);
 	return 0;
 }
 
 void front_request_queue_blocked_reset(void)
 {
-	memset(&rqblockData, 0, sizeof(RQBlockData));
-}
-
-unsigned long long get_last_rqblock_ns()
-{
-	return rqblockData.lastRQBlockNs;
+	queue_free_state(&FrontRQueue);
 }
 
 struct EventHandler frontRequestQueueBlockedHandler = 

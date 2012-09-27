@@ -5,31 +5,25 @@
 #include "Macros.h"
 #include "Trace.h"
 #include "Lost_records.h"
+#include "Queue_state.h"
 #include "Front_request_queue_unblocked.h"
 #include "Front_request_queue_blocked.h"
 
-unsigned long long lastRQUnblockNs;
+extern QueueState *FrontRQueue;
 
 int front_request_queue_unblocked_init(EventHandler *handler)
 {
-	lastRQUnblockNs = 0;
+	if(FrontRQueue == NULL)
+	{
+		queue_init_state(&FrontRQueue);
+	}
+
 	return 0;
 }
 
 int front_request_queue_unblocked_handler(EventHandler *handler, Event *event)
 {
-	unsigned long long lastRQBlockNs = get_last_rqblock_ns();
-
-	if(lastRQUnblockNs > lastRQBlockNs)
-	{
-		/* Successive Unblock msgs seen, w/o a block msg.
-		 * Ignore latest unblock msg.
-		 */
-		return 0;
-	}
-
-	/* 1st RQ Unblock msg after a Block msg */
-	lastRQUnblockNs = event->ns;
+	queue_update_state(FrontRQueue, Q_UNBLOCKED, event);
 
 	return 0;
 }
@@ -41,12 +35,7 @@ int front_request_queue_unblocked_finalize(EventHandler *handler)
 
 void front_request_queue_unblocked_reset(void)
 {
-	lastRQUnblockNs = 0;
-}
-
-unsigned long long get_last_rqunblock_ns()
-{
-	return lastRQUnblockNs;
+	queue_free_state(&FrontRQueue);
 }
 
 struct EventHandler frontRequestQueueUnblockedHandler = 
