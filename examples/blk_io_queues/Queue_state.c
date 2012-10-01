@@ -25,36 +25,37 @@ int queue_init_state(QueueState **qst)
 	return 0;
 }
 
-int queue_update_state(QueueState *qst, Message msg, Event *ev)
+Time queue_update_state(QueueState *qst, Message msg, Event *ev)
 {
+	Time time = 0;
+
 	if(qst == NULL)
 	{
 		fprintf(stderr, "%s:%d qst ptr is NULL\n", __FILE__, __LINE__);
-		return -1;
+		return 0;
 	}
 
 	switch(qst->state)
 	{
 		case INIT:
-			queue_update_state_init(qst, msg, ev);
+			time = queue_update_state_init(qst, msg, ev);
 			break;
 		case BLOCKED:
-			queue_update_state_blocked(qst, msg, ev);
+			time = queue_update_state_blocked(qst, msg, ev);
 			break;
 		case UNBLOCKED:
-			queue_update_state_unblocked(qst, msg, ev);
+			time = queue_update_state_unblocked(qst, msg, ev);
 			break;
 		case UNKNOWN:
-			queue_update_state_unknown(qst, msg, ev);
+			time = queue_update_state_unknown(qst, msg, ev);
 			break;
 	}
 
-	return 0;
+	return time;
 }
 
-void queue_update_state_init(QueueState *qst, Message msg, Event *ev)
+Time queue_update_state_init(QueueState *qst, Message msg, Event *ev)
 {
-
 	switch(msg)
 	{
 		case Q_BLOCKED: 
@@ -69,23 +70,29 @@ void queue_update_state_init(QueueState *qst, Message msg, Event *ev)
 			qst->state = UNKNOWN;
 			break;
 		default:
-			return;
+			return 0;
 	}
 
 	qst->lastNs = ev->ns;
+	return 0;
+
 }
 
-void queue_update_state_blocked(QueueState *qst, Message msg, Event *ev)
+Time queue_update_state_blocked(QueueState *qst, Message msg, Event *ev)
 {
+	Time time = 0;
+
 	switch(msg)
 	{
 		/* No need to update state */
 		case Q_BLOCKED: 
-			return;
+			return 0;
 		case Q_UNBLOCKED:
 			qst->state = UNBLOCKED;
-			qst->totalBlockedTime += ev->ns - qst->lastNs;
-			qst->totalTime += ev->ns - qst->lastNs;
+
+			time = ev->ns - qst->lastNs;
+			qst->totalBlockedTime += time;
+			qst->totalTime += time;
 			break;
 		/* In case of lost_rec, insert a Q_UNBLOCKED before LOST_REC. 
 		 * Then,
@@ -101,31 +108,37 @@ void queue_update_state_blocked(QueueState *qst, Message msg, Event *ev)
 
 				if(lastEvNs)
 				{
-					qst->totalBlockedTime += lastEvNs - qst->lastNs;
-					qst->totalTime += lastEvNs - qst->lastNs;
+					time = lastEvNs - qst->lastNs;
+					qst->totalBlockedTime += time;
+					qst->totalTime += time;
 				}
 				break;
 			}
 			else
-				return;
+				return 0;
 		default:
-			return;
+			return 0;
 	}
 
 	qst->lastNs = ev->ns;
+	return time;
 }
 
-void queue_update_state_unblocked(QueueState *qst, Message msg, Event *ev)
+Time queue_update_state_unblocked(QueueState *qst, Message msg, Event *ev)
 {
+	Time time = 0;
+
 	switch(msg)
 	{
 		case Q_BLOCKED:
 			qst->state = BLOCKED;
-			qst->totalUnblockedTime += ev->ns - qst->lastNs;
-			qst->totalTime += ev->ns - qst->lastNs;
+
+			time = ev->ns - qst->lastNs;
+			qst->totalUnblockedTime += time;
+			qst->totalTime += time;
 			break;
 		case Q_UNBLOCKED:
-			return;
+			return 0;
 		/* In case of lost_rec, insert a Q_BLOCKED before LOST_REC. 
 		 * Then,
 		 * 	ns = is the last seen msg before lost records.
@@ -140,33 +153,42 @@ void queue_update_state_unblocked(QueueState *qst, Message msg, Event *ev)
 
 				if(lastEvNs)
 				{
-					qst->totalUnblockedTime += lastEvNs - qst->lastNs;
-					qst->totalTime += lastEvNs - qst->lastNs;
+					time = lastEvNs - qst->lastNs;
+
+					qst->totalUnblockedTime += time;
+					qst->totalTime += time;
 				}
 				break;
 			}
 			else
-				return;
+				return 0;
 		default:
-			return;
+			return 0;
 	}
 
 	qst->lastNs = ev->ns;
+	return time;
 }
 
-void queue_update_state_unknown(QueueState *qst, Message msg, Event *ev)
+Time queue_update_state_unknown(QueueState *qst, Message msg, Event *ev)
 {
+	Time time = 0;
+
 	switch(msg)
 	{
 		case Q_BLOCKED:
 			qst->state = BLOCKED;
-			qst->totalUnblockedTime += ev->ns - qst->lastNs;
-			qst->totalTime += ev->ns - qst->lastNs;
+
+			time = ev->ns - qst->lastNs;
+			qst->totalUnblockedTime += time;
+			qst->totalTime += time;
 			break;
 		case Q_UNBLOCKED:
 			qst->state = UNBLOCKED;
-			qst->totalBlockedTime += ev->ns - qst->lastNs;
-			qst->totalTime += ev->ns - qst->lastNs;
+
+			time = ev->ns - qst->lastNs;
+			qst->totalBlockedTime += time;
+			qst->totalTime += time;
 			break;
 		case LOST_REC:
 			if(ev->cpu == qst->cpus)
@@ -175,12 +197,13 @@ void queue_update_state_unknown(QueueState *qst, Message msg, Event *ev)
 				break;
 			}
 			else
-				return;
+				return 0;
 		default:
-			return;
+			return 0;
 	}
 
 	qst->lastNs = ev->ns;
+	return time;
 }
 
 void queue_free_state(QueueState **qst)

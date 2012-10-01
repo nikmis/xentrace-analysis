@@ -10,10 +10,16 @@
 #include "Front_shared_ring_queue_unblocked.h"
 #include "Front_shared_ring_queue_blocked.h"
 
+FILE *fp;
 QueueState *FrontSRQueue;
 
 int front_shared_ring_queue_unblocked_init(EventHandler *handler)
 {
+	if((fp = fopen("out.dat", "w+")) == NULL)
+	{
+		fprintf(stderr, "error opening histogram file\n");
+	}
+
 	if(FrontSRQueue == NULL)
 	{
 		queue_init_state(&FrontSRQueue);
@@ -24,17 +30,28 @@ int front_shared_ring_queue_unblocked_init(EventHandler *handler)
 
 int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *event)
 {
-	queue_update_state(FrontSRQueue, Q_UNBLOCKED, event);
+	unsigned long long wTime = queue_update_state(FrontSRQueue, Q_UNBLOCKED, event);
+
+	if((wTime) && (fp) && (fwrite(&wTime, sizeof(unsigned long long), 1, fp) != 1))
+	{
+		if(!feof(fp))
+		{
+			fprintf(stderr, "error writing to histogram file\n");
+		}
+	}
+
 
 	return 0;
 }
 
 int front_shared_ring_queue_unblocked_finalize(EventHandler *handler)
 {
-	printf("Front Shared Ring Queue was blocked for %15.3f (ms)\n", 
+	printf("Front Shared Ring Queue was blocked for %15.3f (ms)\n\n", 
 			(float)queue_blocked_time(FrontSRQueue)/MEGA);
 
 	queue_free_state(&FrontSRQueue);	
+
+	fclose(fp);
 	return 0;
 }
 
