@@ -1,4 +1,5 @@
 CC=clang -Wall -m32 -O3
+CPP=clang++ -Wall -m32
 INC=-I../../include
 
 OBJS=	Event.o\
@@ -17,14 +18,21 @@ OBJS=	Event.o\
 	Front_shared_ring_queue_blocked.o\
 	Front_shared_ring_queue_unblocked.o\
 	Lost_records.o
-
+	
 vpath %.h ../../include
 vpath %.h .
 vpath %.c ../../src
 vpath %.c .
 
-all: main.c $(OBJS) Macros.h Externals.h Queue_state.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h
-	$(CC) $(INC) $<  $(OBJS) -o ../../test/blk_queue_io.out	
+all: main.o Histogram.o
+
+main.o: main.c $(OBJS) Macros.h Externals.h Queue_state.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h
+	$(CC) $(INC) $<  $(OBJS) -o ../../test/blk_queue_io
+	rm -f *.o
+
+Histogram.o: Histogram.cpp Histogram.h histo.cpp
+	$(CPP) -c Histogram.cpp -o $@
+	$(CPP) Histogram.o histo.cpp -o ../../test/histogram
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
