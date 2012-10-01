@@ -10,10 +10,16 @@
 #include "Front_request_queue_blocked.h"
 #include "Front_request_queue_unblocked.h"
 
+FILE *frqFP;
 QueueState *FrontRQueue;
 
 int front_request_queue_blocked_init(EventHandler *handler)
 {
+	if((frqFP = fopen("frq.dat", "w+")) == NULL)
+	{
+		fprintf(stderr, "error opening histogram file\n");
+	}
+
 	if(FrontRQueue == NULL)
 	{
 		queue_init_state(&FrontRQueue);
@@ -24,7 +30,15 @@ int front_request_queue_blocked_init(EventHandler *handler)
 
 int front_request_queue_blocked_handler(EventHandler *handler, Event *event)
 {
-	queue_update_state(FrontRQueue, Q_BLOCKED, event);
+	unsigned long long wTime = queue_update_state(FrontRQueue, Q_BLOCKED, event);
+
+	if((wTime) && (frqFP) && (fwrite(&wTime, sizeof(unsigned long long), 1, frqFP) != 1))
+	{
+		if(!feof(frqFP))
+		{
+			fprintf(stderr, "error writing to histogram file\n");
+		}
+	}
 
 	return 0;
 }
@@ -33,6 +47,10 @@ int front_request_queue_blocked_finalize(EventHandler *handler)
 {
 	printf("Front Request Queue was unblocked for %15.3f (ms)\n\n", 
 			(float)queue_unblocked_time(FrontRQueue)/MEGA);
+
+	queue_free_state(&FrontRQueue);	
+
+	fclose(frqFP);
 	return 0;
 }
 

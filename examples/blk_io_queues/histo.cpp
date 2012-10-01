@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
 	if((fp = fopen(argv[2], "r")) == NULL)
 	{
-		printf("Can't open file %s\n", argv[2]);
+		cout << "Can't open file " << argv[2] << endl;
 		exit(0);
 	}
 	
