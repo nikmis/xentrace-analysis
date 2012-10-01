@@ -15,7 +15,7 @@ QueueState *FrontSRQueue;
 
 int front_shared_ring_queue_unblocked_init(EventHandler *handler)
 {
-	if((fp = fopen("out.dat", "w+")) == NULL)
+	if((fp = fopen("fsrq.dat", "w+")) == NULL)
 	{
 		fprintf(stderr, "error opening histogram file\n");
 	}

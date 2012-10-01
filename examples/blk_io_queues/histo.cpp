@@ -8,20 +8,21 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+	if(argc < 3)
+	{
+		cout 	<< "Usage: $./Histogram <bucket(ns)> <filename>" << endl
+			<< "Ex:	   $./Histogram 1000000	out.dat" << endl; 
+		exit(0);
+	}
+
 	FILE *fp;
 
-	if((fp = fopen("out.dat", "r")) == NULL)
+	if((fp = fopen(argv[2], "r")) == NULL)
 	{
-		printf("Can't open file\n");
+		printf("Can't open file %s\n", argv[2]);
 		exit(0);
 	}
 	
-	if(argc < 2)
-	{
-		cout << "Usage: ./Histogram <bucket size in nano seconds>" << endl;
-		exit(0);
-	}
-
 	char *end;
 	unsigned long long bucket = strtoll(argv[1], &end, 10);
 	
