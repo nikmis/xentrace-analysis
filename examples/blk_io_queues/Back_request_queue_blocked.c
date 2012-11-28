@@ -9,6 +9,7 @@
 #include "Queue_state.h"
 #include "Back_request_queue_blocked.h"
 #include "Back_request_queue_unblocked.h"
+#include "CpuList.h"
 
 FILE *brqFP;
 extern QueueState *BackRQueue;
@@ -50,9 +51,11 @@ int back_request_queue_blocked_finalize(EventHandler *handler)
 	printf(	"Queue BLOCKED:   Unable to add new requests to queue or queue empty.\n"
 		"Queue UNBLOCKED: Can enqueue new incoming requests.\n\n");	
 
-	printf("\nBack Request Queue Unblocked      : %15.3f (ms) ; Blocked : %15.3f (ms)\n\n", 
+	printf(	"\nBack Request Queue Unblocked      : %15.3f (ms), %5.2f %% ; Blocked : %15.3f (ms), %5.2f %%\n\n",
 			(float)queue_unblocked_time(BackRQueue)/MEGA,
-			(float)queue_blocked_time(BackRQueue)/MEGA);
+			(float)queue_unblocked_time(BackRQueue)/get_max_total_time()*100,
+			(float)queue_blocked_time(BackRQueue)/MEGA,
+			(float)(queue_blocked_time(BackRQueue)*100)/get_max_total_time());
 
 	fclose(brqFP);
 	return 0;

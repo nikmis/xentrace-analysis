@@ -33,4 +33,5 @@ unsigned is_last_record_flag_set();
 
 void free_cpulist(CpuList *cpus);
 
+unsigned long long get_max_total_time();
 #endif

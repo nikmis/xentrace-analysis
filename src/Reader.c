@@ -73,6 +73,7 @@ int reader_loop(Reader *reader)
 
 	/* Make sure to call get_total_time() before calling finalizers as this
 	 * data maybe used by some finalizers */
+	/* DONT MOVE THIS FUNC CALL */
 	float totalTime = get_total_time(reader->cpus)/MEGA;
 
 	evh_call_finalizers(reader);

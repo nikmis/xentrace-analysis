@@ -9,6 +9,7 @@
 
 unsigned lostRecFlagGlobal = 0;
 unsigned long long avgTotalTime = 0;
+unsigned long long maxCpuTotalTime = 0;
 
 void init_cpulist(CpuList *cpus)
 {
@@ -80,11 +81,19 @@ unsigned long long get_total_time(CpuList *cpus)
 
 		tmpCpuList->totalTime = tmpTime;
 		totalTime += tmpTime;
+
+		if(maxCpuTotalTime < tmpTime)
+			maxCpuTotalTime = tmpTime;
 	}
 
 	avgTotalTime = totalTime/cpuCount;
 
 	return totalTime;
+}
+
+unsigned long long get_max_total_time()
+{
+	return maxCpuTotalTime;
 }
 
 unsigned long long get_avg_total_time(void)
