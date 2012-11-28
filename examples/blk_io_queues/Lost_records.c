@@ -5,6 +5,7 @@
 #include "Trace.h"
 #include "Lost_records.h"
 #include "Queue_state.h"
+#include "CpuList.h"
 #include "Front_shared_ring_queue_unblocked.h"
 
 extern QueueState *FrontSRQueue;
@@ -56,6 +57,7 @@ int lost_records_handler(EventHandler *handler, Event *event)
 
 				if((event->ns - event->lastNs) > LOST_REC_MAX_TIME)
 				{
+					set_last_record_flag();
 					printf("CPU: %u : Lost records at %llu : Time Lost = %15.3f (ms)\n", 
 							event->cpu, event->ns, 
 							(float)(event->ns - event->lastNs)/MEGA);
@@ -70,7 +72,7 @@ int lost_records_handler(EventHandler *handler, Event *event)
 
 int lost_records_finalize(EventHandler *handler)
 {
-	printf("Lost records data\n");
+	printf("LOST RECORDS\n");
 	print_line();
 	printf("\nTotal lost_record occurences = %u\n", lostRecCount);
 
@@ -95,7 +97,6 @@ int lost_records_finalize(EventHandler *handler)
 	}
 			
 	printf("Total lost time  = %10.3f (ms)\n\n", (float)totalCPULostTime/MEGA);
-	print_line();
 
 	free_lrt_cpulist();
 

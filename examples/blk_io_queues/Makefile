@@ -44,7 +44,7 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 Reader.o: Reader.c Reader.h Macros.h
 	$(CC) $(INC) -c $< -o $@
 
-CpuList.o: CpuList.c CpuList.h list.h
+CpuList.o: CpuList.c CpuList.h list.h Event.h
 	$(CC) $(INC) -c $< -o $@
 
 Queue_state.o: Queue_state.c Queue_state.h Lost_records.h Event.h Macros.h list.h Trace.h

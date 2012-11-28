@@ -181,9 +181,10 @@ int check_null(void *ev, void *fp)
 		return SUCCESS;
 }
 
-unsigned long long get_first_ns(unsigned int cpu)
+unsigned long long get_first_ns_ev_list(int cpu)
 {
 	unsigned long long i;
+
 	if(eventList != NULL)
 	{
 		for(i = 0; i < numEvents; i++)
@@ -196,7 +197,7 @@ unsigned long long get_first_ns(unsigned int cpu)
 	return 0;
 }
 
-unsigned long long get_last_ns(unsigned int cpu)
+unsigned long long get_last_ns_ev_list(int cpu)
 {
 	long long i;
 

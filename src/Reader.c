@@ -67,7 +67,7 @@ int reader_loop(Reader *reader)
 			break;
 		evh_call_handlers(reader, &event);
 
-		update_cpulist(reader->cpus, event.cpu);
+		update_cpulist(reader->cpus, &event);
 
 	} while(!feof(reader->fp)); /* Update condition to check for sorted array not fp */
 
@@ -77,7 +77,7 @@ int reader_loop(Reader *reader)
 
 	evh_call_finalizers(reader);
 
-	printf("Log Collection data\n");
+	printf("LOG COLLECTION\n");
 	print_line();
 
 	print_cpu_times(reader->cpus);

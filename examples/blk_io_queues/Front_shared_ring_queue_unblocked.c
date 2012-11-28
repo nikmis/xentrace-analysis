@@ -46,7 +46,8 @@ int front_shared_ring_queue_unblocked_handler(EventHandler *handler, Event *even
 
 int front_shared_ring_queue_unblocked_finalize(EventHandler *handler)
 {
-	printf("Front Shared Ring Queue was blocked for %15.3f (ms)\n\n", 
+	printf("Front Shared Ring Queue Unblocked : %15.3f (ms) ; Blocked : %15.3f (ms) \n\n", 
+			(float)queue_unblocked_time(FrontSRQueue)/MEGA,
 			(float)queue_blocked_time(FrontSRQueue)/MEGA);
 
 	queue_free_state(&FrontSRQueue);	

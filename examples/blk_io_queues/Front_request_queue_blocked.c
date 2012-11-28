@@ -45,8 +45,9 @@ int front_request_queue_blocked_handler(EventHandler *handler, Event *event)
 
 int front_request_queue_blocked_finalize(EventHandler *handler)
 {
-	printf("Front Request Queue was unblocked for %15.3f (ms)\n\n", 
-			(float)queue_unblocked_time(FrontRQueue)/MEGA);
+	printf("Front Request Queue Unblocked     : %15.3f (ms) ; Blocked : %15.3f (ms)\n\n", 
+			(float)queue_unblocked_time(FrontRQueue)/MEGA,
+			(float)queue_blocked_time(FrontRQueue)/MEGA);
 
 	queue_free_state(&FrontRQueue);	
 
