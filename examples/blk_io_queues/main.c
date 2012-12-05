@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
 	evh_register_handler(&reader, &frontSharedRingQueueBlockedHandler);
 	evh_register_handler(&reader, &frontSharedRingQueueUnblockedHandler);
 
+	evh_register_handler(&reader, &frontSharedRingRespQueueBlockedHandler);
+	evh_register_handler(&reader, &frontSharedRingRespQueueUnblockedHandler);
 
 	reader_loop(&reader);
 

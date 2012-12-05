@@ -17,6 +17,8 @@ OBJS=	Event.o\
 	Front_request_queue_unblocked.o\
 	Front_shared_ring_queue_blocked.o\
 	Front_shared_ring_queue_unblocked.o\
+	Front_shared_ring_resp_queue_blocked.o\
+	Front_shared_ring_resp_queue_unblocked.o\
 	Lost_records.o
 	
 vpath %.h ../../include
@@ -26,7 +28,7 @@ vpath %.c .
 
 all: main.o Histogram.o
 
-main.o: main.c $(OBJS) Macros.h Externals.h Queue_state.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h
+main.o: main.c $(OBJS) Macros.h Externals.h Queue_state.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h Front_shared_ring_resp_queue_blocked.h Front_shared_ring_resp_queue_unblocked.h
 	$(CC) $(INC) $<  $(OBJS) -o ../../test/blk_queue_io
 	rm -f *.o
 
@@ -78,6 +80,12 @@ Front_shared_ring_queue_blocked.o: Front_shared_ring_queue_blocked.c Front_share
 	$(CC) $(INC) -c $< -o $@
 
 Front_shared_ring_queue_unblocked.o: Front_shared_ring_queue_unblocked.c Front_shared_ring_queue_unblocked.h Queue_state.c Queue_state.h Macros.h list.h Trace.h
+	$(CC) $(INC) -c $< -o $@
+
+Front_shared_ring_resp_queue_blocked.o: Front_shared_ring_resp_queue_blocked.c Front_shared_ring_resp_queue_blocked.h Queue_state.c Queue_state.h Macros.h list.h Trace.h
+	$(CC) $(INC) -c $< -o $@
+
+Front_shared_ring_resp_queue_unblocked.o: Front_shared_ring_resp_queue_unblocked.c Front_shared_ring_resp_queue_unblocked.h Queue_state.c Queue_state.h Macros.h list.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
 Lost_records.o: Lost_records.c Lost_records.h Front_shared_ring_queue_unblocked.c Queue_state.h Macros.h Externals.h

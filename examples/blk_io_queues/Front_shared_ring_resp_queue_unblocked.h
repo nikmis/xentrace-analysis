@@ -1,0 +1,10 @@
+#ifndef __HDLR_FRONT_SHARED_RING_RESP_QUEUE_UNBLOCKED
+#define __HDLR_FRONT_SHARED_RING_RESP_QUEUE_UNBLOCKED
+
+int front_shared_ring_resp_queue_unblocked_init(EventHandler *handler);
+int front_shared_ring_resp_queue_unblocked_handler(EventHandler *handler, Event *event);
+int front_shared_ring_resp_queue_unblocked_finalize(EventHandler *handler);
+
+void front_shared_ring_resp_queue_unblocked_reset(void);
+
+#endif

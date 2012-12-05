@@ -111,6 +111,9 @@
 #define TRC_BLKFRONT_REQUEST_QUEUE_BLOCKED        (TRC_XA_BLK + 9)
 #define TRC_BLKFRONT_REQUEST_QUEUE_UNBLOCKED      (TRC_XA_BLK + 10)
 
+// Shared ring response queue, blocked when there are no responses in the ring
+#define TRC_BLKFRONT_SHARED_RING_RESP_QUEUE_BLOCKED    (TRC_XA_BLK + 11)
+#define TRC_BLKFRONT_SHARED_RING_RESP_QUEUE_UNBLOCKED  (TRC_XA_BLK + 12)
 
 #ifdef CONFIG_TIMETRAVEL
 #define TRC_SCHED_START_TIME_DILATE    (TRC_SCHED + 32)
