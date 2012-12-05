@@ -115,6 +115,15 @@
 #define TRC_BLKFRONT_SHARED_RING_RESP_QUEUE_BLOCKED    (TRC_XA_BLK + 11)
 #define TRC_BLKFRONT_SHARED_RING_RESP_QUEUE_UNBLOCKED  (TRC_XA_BLK + 12)
 
+// Notify backend with an interrupt
+#define TRC_BLKBACK_INT                          (TRC_XA_BLK + 13)
+#define TRC_BLKBACK_INT_SEND                     (TRC_XA_BLK + 14)
+//
+// Notify frontend with an interrupt
+#define TRC_BLKFRONT_INT                         (TRC_XA_BLK + 15)
+#define TRC_BLKFRONT_INT_SEND                    (TRC_XA_BLK + 16)
+
+
 #ifdef CONFIG_TIMETRAVEL
 #define TRC_SCHED_START_TIME_DILATE    (TRC_SCHED + 32)
 #define TRC_SCHED_STOP_TIME_DILATE     (TRC_SCHED + 33)

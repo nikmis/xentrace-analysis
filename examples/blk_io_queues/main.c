@@ -43,6 +43,12 @@ int main(int argc, char *argv[])
 	evh_register_handler(&reader, &frontSharedRingRespQueueBlockedHandler);
 	evh_register_handler(&reader, &frontSharedRingRespQueueUnblockedHandler);
 
+	evh_register_handler(&reader, &backRequestInterruptSendHandler);
+	evh_register_handler(&reader, &backRequestInterruptReceiveHandler);
+
+	evh_register_handler(&reader, &backResponseInterruptSendHandler);
+	evh_register_handler(&reader, &backResponseInterruptReceiveHandler);
+
 	reader_loop(&reader);
 
 	reader_exit(&reader);
