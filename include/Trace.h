@@ -61,14 +61,14 @@
 #define TRC_SCHED_SWITCH_INFPREV (TRC_SCHED + 14)
 #define TRC_SCHED_SWITCH_INFNEXT (TRC_SCHED + 15)
 
-#define TRC_EVENT                                (TRC_SCHED + 101)
-#define TRC_EXIT_TO_GUEST                        (TRC_SCHED + 102)
-#define TRC_EXIT_TO_XEN                          (TRC_SCHED + 103)
-#define TRC_EXCEPTION                            (TRC_SCHED + 104)
-#define TRC_EXCEPTION_IN_XEN                     (TRC_SCHED + 105)
-#define TRC_INTERRUPT                            (TRC_SCHED + 106)
-#define TRC_INTERRUPT_IN_XEN                     (TRC_SCHED + 107)
-#define TRC_HYPERCALL                            (TRC_SCHED + 108) 
+#define TRC_EVENT				(TRC_SCHED + 101)
+#define TRC_EXIT_TO_GUEST			(TRC_SCHED + 102)
+#define TRC_EXIT_TO_XEN				(TRC_SCHED + 103)
+#define TRC_EXCEPTION				(TRC_SCHED + 104)
+#define TRC_EXCEPTION_IN_XEN			(TRC_SCHED + 105)
+#define TRC_INTERRUPT				(TRC_SCHED + 106)
+#define TRC_INTERRUPT_IN_XEN			(TRC_SCHED + 107)
+#define TRC_HYPERCALL				(TRC_SCHED + 108) 
 
 #ifdef CONFIG_TIMETRAVEL
 #define TRC_SCHED_START_TIME_DILATE    (TRC_SCHED + 32)
