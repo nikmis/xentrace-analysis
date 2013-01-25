@@ -11,7 +11,11 @@
 #include "Switch_infnext.h"
 #include "Domain_wake.h"
 
+#define MAX_WAIT_TIME 70000000
+#define NUM_SAMPLES 10
+
 SwitchSchedData switchSchedData;
+FILE *histFP;
 
 int switch_sched_init(EventHandler *handler)
 {
@@ -25,9 +29,20 @@ int switch_sched_init(EventHandler *handler)
 	dat->schedNs = 0;
 	dat->totalWaitTime = 0;
 
+	/* Histogram data */
+	dat->buckets = (unsigned int *) malloc(sizeof(unsigned int)*(NUM_SAMPLES+1)); /* +1 for edge cases > */
+
+	int i = 0;
+	while(i < (NUM_SAMPLES+1)) dat->buckets[i++] = 0;
+
 	memset(dat->d, 0, sizeof(struct DomIdWaitTime) * MAX_DOMS);
 
-	return SUCCESS;
+	if((histFP = fopen("histogram.txt", "w+")) == NULL)
+	{
+		fprintf(stderr, "histogram data couldn't be collected\n");
+	}
+
+	return 0;
 }
 
 int switch_sched_handler(EventHandler *handler, Event *event)
@@ -71,11 +86,16 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 		{
 			/* Use ns instead for computing wait times */
 
-			long long diff = dat->schedNs - get_wake_ns(dat->schedActiveDomId, dat->schedActiveVcpu);
+			unsigned long long wakeNs = get_wake_ns(dat->schedActiveDomId, dat->schedActiveVcpu);
+			long long diff = dat->schedNs - wakeNs;
+
 			if(diff < 0)
 				printf("negative wait: %lld %lld\n", diff, dat->schedNs);
 			dat->d[i].domIdWaitTime += diff;
 			dat->totalWaitTime += diff;
+
+			add_to_histogram(diff, wakeNs, dat);
+			//printf("%lld %llu\n", diff, wakeNs);
 
 			/* Debug Msg
 			printf("dom_id = %5u | delta = %lld | wait_time = %llu | total_wait_time = %llu | sched_TSC = %llu 
@@ -109,6 +129,21 @@ unsigned short add_dom_wait_time(SwitchSchedData *dat)
 	return numDoms;
 }
 
+void add_to_histogram(long long diff, unsigned long long wakeNs, SwitchSchedData *dat)
+{
+	unsigned long long min = MAX_WAIT_TIME/NUM_SAMPLES;
+	
+	if(diff/min >= NUM_SAMPLES)
+	{
+		dat->buckets[NUM_SAMPLES]++;
+	}
+	else
+	{
+		dat->buckets[(int)diff/min]++;
+	}
+}
+
+
 int switch_sched_finalize(EventHandler *handler)
 {
 	short i = 0;
@@ -121,9 +156,41 @@ int switch_sched_finalize(EventHandler *handler)
 				(double)dat->d[i].domIdWaitTime/MEGA);
 	}
 				
-	printf("Total CPU Wait time for all domains: %lf (ms)\n", 
+	printf("Total CPU Wait time for all domains: %lf (ms)\n\n", 
 			(double)dat->totalWaitTime/MEGA);
-	return SUCCESS;
+
+	storeHistogram(dat);
+	drawConsoleHistogram(dat);
+
+	free(dat->buckets);
+	fclose(histFP);
+	return 0;
+}
+
+void drawConsoleHistogram(SwitchSchedData *dat)
+{
+	int i;
+	for(i = 0; i < NUM_SAMPLES+1; i++)
+	{
+		if(i < NUM_SAMPLES)
+		{
+			printf("%llu - %llu (ns) : %u\n", 
+					(unsigned long long)i*(MAX_WAIT_TIME/NUM_SAMPLES),
+					(unsigned long long)(i+1)*(MAX_WAIT_TIME/NUM_SAMPLES), 
+					dat->buckets[i]);
+		}
+		else
+		{
+			printf("> %llu (ns) : %u\n", 
+					(unsigned long long)MAX_WAIT_TIME, 
+					dat->buckets[i]);
+		}
+	}
+}
+
+void storeHistogram(SwitchSchedData *dat)
+{
+
 }
 
 void switch_sched_reset(void)
@@ -137,6 +204,9 @@ void switch_sched_reset(void)
 	switchSchedData.totalWaitTime = 0;
 
 	memset(switchSchedData.d, 0, sizeof(struct DomIdWaitTime) * MAX_DOMS);
+
+	int i = 0;
+	while(i < (NUM_SAMPLES+2)) switchSchedData.buckets[i++] = 0;
 }
 unsigned int get_old_dom_id(void)
 {

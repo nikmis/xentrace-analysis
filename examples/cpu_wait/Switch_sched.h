@@ -21,6 +21,8 @@ typedef struct SwitchSchedData
 	DomIdWaitTime d[MAX_DOMS];
 	unsigned long long totalWaitTime;
 	unsigned short numDoms;
+	/* Histogram data */
+	unsigned int *buckets;
 } SwitchSchedData;
 
 /* Event handler functions */
@@ -38,5 +40,9 @@ unsigned long long get_switch_ns(void);
 /* Helper functions */
 void sanity_check_domId(void);
 unsigned short add_dom_wait_time(SwitchSchedData *d);
+
+void add_to_histogram(long long diff, unsigned long long wakeNs, SwitchSchedData *dat);
+void storeHistogram(SwitchSchedData *dat);
+void drawConsoleHistogram(SwitchSchedData *dat);
 
 #endif

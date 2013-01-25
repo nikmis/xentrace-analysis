@@ -77,6 +77,7 @@ void domain_wake_reset(void)
 		{
 			list_for_each_entry_reverse(dwd, head, vcpu_list)
 			{
+				//printf("Freed %p %d\n", dwd, i);
 				free(dwd);
 			}
 
