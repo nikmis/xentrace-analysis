@@ -15,7 +15,9 @@
 #define NUM_SAMPLES 10
 
 SwitchSchedData switchSchedData;
+/* 
 FILE *histFP;
+*/
 
 int switch_sched_init(EventHandler *handler)
 {
@@ -37,11 +39,12 @@ int switch_sched_init(EventHandler *handler)
 
 	memset(dat->d, 0, sizeof(struct DomIdWaitTime) * MAX_DOMS);
 
+	/*
 	if((histFP = fopen("histogram.txt", "w+")) == NULL)
 	{
 		fprintf(stderr, "histogram data couldn't be collected\n");
 	}
-
+	*/
 	return 0;
 }
 
@@ -159,11 +162,12 @@ int switch_sched_finalize(EventHandler *handler)
 	printf("Total CPU Wait time for all domains: %lf (ms)\n\n", 
 			(double)dat->totalWaitTime/MEGA);
 
-	storeHistogram(dat);
 	drawConsoleHistogram(dat);
 
 	free(dat->buckets);
+	/*
 	fclose(histFP);
+	*/
 	return 0;
 }
 
@@ -186,11 +190,6 @@ void drawConsoleHistogram(SwitchSchedData *dat)
 					dat->buckets[i]);
 		}
 	}
-}
-
-void storeHistogram(SwitchSchedData *dat)
-{
-
 }
 
 void switch_sched_reset(void)
