@@ -1,13 +1,3 @@
-GIT-BRANCHES
-================
-Please browse through git branches(GITHUB: Menu at the top) to select the analysis tool code you wish to browse. Tools still under development and will be merged to master soon.
-
-	* blk_io_queues : Disk I/O
-	* cpu_util_muticore : CPU Utilization
-	* cpu_wait_multicore : CPU Scheduling Latency
-	* xen_dom_time_sharing : Time in Hypervisor
-	* xen_stats : Xen Event stats.
-
 INTRODUCTION
 ================
 Virtual machines are becoming an integral part of both industrial data center facilities and large academic experimentation environments. It’s important to measure the overheads of virtualization and identify performance bottlenecks in the virtual setups. This project aspires to provide tools to perform fine-grained analysis of resource utilization, virtualization overheads, and performance bottlenecks, in a virtualized software stack.
@@ -30,3 +20,14 @@ Some of the analysis tools being implemented for this project are listed below.
 * Time in Hypervisor: During an I/O intensive operation, a VM may spend much of its time being idle while the hypervisor does the work on its behalf. Hence this may give a wrong picture to someone who just relies on CPU usage data, as it doesn’t accurately represent the time spent in hypervisor. It can also help identify bottlenecks in the execution. (Ex: high latency I/O)
 * CPU Scheduling Latency: Due to overscheduling of VCPUs or physical CPU being busy, VM context switches can get delayed. This analysis measures how much time a VM had to wait to get scheduled since the request to context switch was sent out.
 * Disk I/O: A block request from a VM navigates through many different queues like the VM elevator queue, Xen Shared ring buffers, queues inside Dom 0 etc., before the request actually reaches the HDD. The response also traverses the same path. Hence monitoring the state of these queues can help identify overheads of virtualization and identify bottlenecks in the disk I/O pipeline.
+
+TOOLS
+================
+All tools are listed under 'examples' directory. Below are their descriptions.
+
+	* blk_io_queues 	: Disk I/O
+	* cpu_time_sharing 	: CPU Utilization
+	* cpu_wait 		: CPU Scheduling Latency
+	* xen_dom_time_sharing 	: Time in Hypervisor
+	* xen_stats 		: Xen Event stats.
+
