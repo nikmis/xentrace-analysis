@@ -5,8 +5,13 @@
 #include "Event.h"
 
 static Event *eventList = NULL;
-static unsigned long eventCount = 0;
-static unsigned long numEvents = 0;
+static unsigned long long eventCount = 0;
+static unsigned long long numEvents = 0;
+
+unsigned long long get_total_event_records()
+{
+	return numEvents;
+}
 
 int compare(const void *a, const void *b)
 {
@@ -131,7 +136,12 @@ int return_next_event(Event *ev)
 		/* Keep track of last ns timestamp for lost_records check */
 		if(eventCount > 0)
 		{
-			eventList[eventCount].lastNs = eventList[eventCount - 1].ns;
+			unsigned long long i = 0;
+			while((i++ < eventCount) 
+				&& (eventList[eventCount - i].cpu != eventList[eventCount].cpu));
+
+			if((eventCount - i - 1) > 0)
+				eventList[eventCount].lastNs = eventList[eventCount - i].ns;
 		}
 		memcpy(ev, &eventList[eventCount++], sizeof(Event));
 		return SUCCESS;
@@ -170,3 +180,41 @@ int check_null(void *ev, void *fp)
 	else
 		return SUCCESS;
 }
+
+unsigned long long get_first_ns_ev_list(int cpu)
+{
+	unsigned long long i;
+
+	if(eventList != NULL)
+	{
+		for(i = 0; i < numEvents; i++)
+		{
+			if(eventList[i].cpu == cpu)
+				return eventList[i].ns;
+		}
+	}
+
+	return 0;
+}
+
+unsigned long long get_last_ns_ev_list(int cpu)
+{
+	long long i;
+
+	if(eventList != NULL)
+	{
+		for(i = numEvents - 1; i != 0; i--)
+		{
+			if(eventList[i].cpu == cpu)
+				return eventList[i].ns;
+		}
+	}
+
+	return 0;
+}
+
+void print_line(void)
+{
+	printf("==================================================================\n");
+}
+

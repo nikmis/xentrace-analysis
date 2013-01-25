@@ -5,7 +5,7 @@
 #include "EventHandler.h"
 #include "Macros.h"
 #include "Reader.h"
-
+#include "CpuList.h"
 
 void reader_init(Reader *reader, const char *filename)
 {
@@ -16,6 +16,10 @@ void reader_init(Reader *reader, const char *filename)
 		printf("Usage: ./a.out <filename>\n");
 		exit(0);
 	}
+
+	/* Init Cpu List */
+	reader->cpus = (CpuList *) malloc(sizeof(CpuList));
+	init_cpulist(reader->cpus);
 
 	/* Init and sort logs */
 	sort_events_by_ns(reader->fp);
@@ -42,6 +46,7 @@ void reader_exit(Reader *reader)
 
 	free(reader->handler_array);
 	free_events();
+	free_cpulist(reader->cpus);
 
 	return;
 }
@@ -62,9 +67,37 @@ int reader_loop(Reader *reader)
 			break;
 		evh_call_handlers(reader, &event);
 
-	} while(!feof(reader->fp));
+		update_cpulist(reader->cpus, &event);
+
+	} while(!feof(reader->fp)); /* Update condition to check for sorted array not fp */
+
+	/* Make sure to call get_total_time() before calling finalizers as this
+	 * data maybe used by some finalizers */
+	/* DONT MOVE THIS FUNC CALL */
+	float totalTime = get_total_time(reader->cpus)/MEGA;
 
 	evh_call_finalizers(reader);
-	
+
+	printf("LOG COLLECTION\n");
+	print_line();
+
+	print_cpu_times(reader->cpus);
+
+	printf("\nAverage time spent collecting records is %15.3f (ms)\n", (float)get_avg_total_time()/MEGA);
+	printf("Total CPU time spent collecting records is %15.3f (ms) \n", totalTime);
+	printf("\nTotal event records collected = %llu\n", get_total_event_records());
+
 	return SUCCESS;
+}
+
+void print_cpu_times(CpuList *cpus)
+{
+	CpuList *tmpCpuList;
+	list_head *head = &(cpus->cpuList);
+
+	list_for_each_entry(tmpCpuList, head, cpuList)
+	{
+		printf("Total time spent on CPU %u is %15.3f (ms)\n", 
+				tmpCpuList->cpu, (float)get_total_time_cpu(cpus, tmpCpuList->cpu)/MEGA);
+	}
 }

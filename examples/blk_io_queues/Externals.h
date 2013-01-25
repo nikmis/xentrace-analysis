@@ -1,0 +1,25 @@
+extern struct EventHandler backInflightQueueBlockedHandler;
+extern struct EventHandler backInflightQueueUnblockedHandler;
+
+extern struct EventHandler backRequestQueueBlockedHandler;
+extern struct EventHandler backRequestQueueUnblockedHandler;
+
+extern struct EventHandler frontGrantQueueBlockedHandler;
+extern struct EventHandler frontGrantQueueUnblockedHandler;
+
+extern struct EventHandler frontRequestQueueBlockedHandler;
+extern struct EventHandler frontRequestQueueUnblockedHandler;
+
+extern struct EventHandler frontSharedRingQueueBlockedHandler;
+extern struct EventHandler frontSharedRingQueueUnblockedHandler;
+
+extern struct EventHandler frontSharedRingRespQueueBlockedHandler;
+extern struct EventHandler frontSharedRingRespQueueUnblockedHandler;
+
+extern struct EventHandler backRequestInterruptSendHandler;
+extern struct EventHandler backRequestInterruptReceiveHandler;
+
+extern struct EventHandler backResponseInterruptSendHandler;
+extern struct EventHandler backResponseInterruptReceiveHandler;
+
+extern struct EventHandler lostRecordsHandler;
