@@ -25,9 +25,9 @@ TOOLS
 ================
 All tools are listed under 'examples' directory. Below are their descriptions.
 
-	* blk_io_queues 	: Disk I/O
-	* cpu_time_sharing 	: CPU Utilization
-	* cpu_wait 		: CPU Scheduling Latency
+	* blk_io_queues 		: Disk I/O
+	* cpu_time_sharing 		: CPU Utilization
+	* cpu_wait 				: CPU Scheduling Latency
 	* xen_dom_time_sharing 	: Time in Hypervisor
-	* xen_stats 		: Xen Event stats.
+	* xen_stats 			: Xen Event stats.
 
