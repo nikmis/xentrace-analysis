@@ -1,10 +1,12 @@
-CC=gcc -Wall -m32
+CC=clang -g -Wall -m32
 INC=-I../../include
 
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
-	Switch_infprev.o
+	Switch_infprev.o\
+	Switch_sched.o\
+	Lost_records.o
 
 vpath %.h ../../include
 vpath %.h .
@@ -12,7 +14,7 @@ vpath %.c ../../src
 vpath %.c .
 
 all: main.c $(OBJS) Macros.h Externals.h
-	$(CC) $(INC) $<  *.o -o ../../test/Switch_infprev.out	
+	$(CC) $(INC) $<  *.o -o ../../test/Cpu_util.out	
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -27,6 +29,12 @@ Reader.o: Reader.c Reader.h Macros.h
 Switch_infprev.o: Switch_infprev.h Switch_infprev.c Macros.h Externals.h
 	$(CC) $(INC) -c Switch_infprev.c
 
+Switch_sched.o: Switch_sched.h Switch_sched.c Macros.h Externals.h list.h
+	$(CC) $(INC) -c Switch_sched.c
+
+Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h Switch_infprev.h
+	$(CC) $(INC) -c Lost_records.c
+
 clean: 
-	rm -rf ../../test/Switch_infprev.out
+	rm -rf ../../test/Cpu_util.out
 	rm -rf *.o

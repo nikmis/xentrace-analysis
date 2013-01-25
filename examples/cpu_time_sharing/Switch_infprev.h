@@ -2,26 +2,20 @@
 #define __HDLR_SWITCH_INFPREV
 
 /* Struct for storing SWITCH_INFPREV related data */
-typedef struct DomTime
+typedef struct CpuLastRuntime
 {
-	unsigned int 		dom_id;
-	unsigned long long 	runtime;
-} DomTime;
-
-typedef struct DomAllTimes
-{
-	unsigned long long	total_time;
-	unsigned short		num_of_doms;
-	DomTime			*dt;
-} DomAllTimes;
+	unsigned long long 	lastRuntime[MAX_DOMS];
+	unsigned int		cpuId;
+	list_head		cpuList;
+} CpuLastRuntime;
 
 /* Event Handler functions */
 int switch_infprev_init(EventHandler *handler);
-int switch_infprev_event(EventHandler *handler, Event *event);
+int switch_infprev_handler(EventHandler *handler, Event *event);
 int switch_infprev_finalize(EventHandler *handler);
+void switch_infprev_reset(void);
 
-/* Event Handler Helper functions */
-unsigned short add_time_to_list(DomTime *, Event *);
-void sanity_check(Event *ev);
+/* Accessor functions */
+unsigned long long switch_infprev_last_runtime(unsigned int cpuId, unsigned int domId);
 
 #endif
