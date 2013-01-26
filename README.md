@@ -10,6 +10,8 @@ The implementation is divided into 2 main components: Reader and Analyses.
 	- The Reader component parses the data inside the logs and neatly constructs C style data structures that are eventually passed to the Analyses component. 
 	- The Analyses consists of a group of handlers(tools) for different types of events. These handlers are the only things that need to be written by the developer to build custom analysis. Some of the analysis tools implemented for this project are discussed below.
 
+![Xen and Xentrace Architecture](https://raw.github.com/nikmis/xentrace-analysis/master/doc/architecture.png)
+
 TOOLS OVERVIEW
 ================
 Some of the analysis tools being implemented for this project are listed below.
