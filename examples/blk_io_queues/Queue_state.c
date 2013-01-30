@@ -208,8 +208,11 @@ Time queue_update_state_unknown(QueueState *qst, Message msg, Event *ev)
 
 void queue_free_state(QueueState **qst)
 {
-	free(*qst);
-	*qst = NULL;
+	if(*qst != NULL)
+	{
+		free(*qst);
+		*qst = NULL;
+	}
 }
 
 Time queue_unblocked_time(QueueState *qst)
