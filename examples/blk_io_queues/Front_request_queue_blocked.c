@@ -49,7 +49,7 @@ int front_request_queue_blocked_finalize(EventHandler *handler)
 			(float)queue_unblocked_time(FrontRQueue)/MEGA,
 			(float)queue_unblocked_time(FrontRQueue)/get_max_total_time()*100,
 			(float)queue_blocked_time(FrontRQueue)/MEGA,
-			(float)queue_blocked_time(FrontRQueue)/get_max_total_time());
+			(float)queue_blocked_time(FrontRQueue)/get_max_total_time()*100);
 
 	queue_free_state(&FrontRQueue);	
 
