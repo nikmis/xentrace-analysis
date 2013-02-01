@@ -137,7 +137,7 @@ int return_next_event(Event *ev)
 		if(eventCount > 0)
 		{
 			unsigned long long i = 0;
-			while((i++ < eventCount) 
+			while((++i < eventCount) 
 				&& (eventList[eventCount - i].cpu != eventList[eventCount].cpu));
 
 			if((eventCount - i - 1) > 0)
