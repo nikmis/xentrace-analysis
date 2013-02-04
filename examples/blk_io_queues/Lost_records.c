@@ -8,10 +8,13 @@
 #include "CpuList.h"
 #include "Front_shared_ring_queue_unblocked.h"
 
+/*
 extern QueueState *FrontSRQueue;
+*/
 extern QueueState *FrontSRRespQueue;
 extern QueueState *FrontRQueue;
 extern QueueState *BackRQueue;
+
 
 unsigned lostRecCount;
 LostRecTime lostRecTime;
@@ -34,11 +37,13 @@ int lost_records_init(EventHandler *handler)
 int lost_records_handler(EventHandler *handler, Event *event)
 {
 	/* Queue specific handling */
+	/*
 	queue_update_state(FrontSRQueue, LOST_REC, event); 
+	*/
 	queue_update_state(FrontSRRespQueue, LOST_REC, event); 
 	queue_update_state(FrontRQueue, LOST_REC, event); 
 	queue_update_state(BackRQueue, LOST_REC, event); 
-
+	
 	/* Lost records received. Clear all handler data */
 	lostRecCount++;
 	update_lrt_cpulist(event->cpu);

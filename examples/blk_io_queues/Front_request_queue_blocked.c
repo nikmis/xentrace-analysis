@@ -45,7 +45,12 @@ int front_request_queue_blocked_handler(EventHandler *handler, Event *event)
 
 int front_request_queue_blocked_finalize(EventHandler *handler)
 {
-	printf("Front Request Queue Unblocked          : %15.3f (ms), %5.2f %% ; Blocked : %15.3f (ms), %5.2f %%\n\n", 
+	printf("QUEUE TIMES\n");
+	print_line();
+	printf(	"Queue BLOCKED:   Unable to add new requests to queue or queue empty.\n"
+		"Queue UNBLOCKED: Can enqueue new incoming requests.\n\n");	
+
+	printf("Front Request Queue Unblocked          : %15.3f (ms), %5.2f %% ; Blocked : %15.3f (ms), %5.2f %%\n", 
 			(float)queue_unblocked_time(FrontRQueue)/MEGA,
 			(float)queue_unblocked_time(FrontRQueue)/get_max_total_time()*100,
 			(float)queue_blocked_time(FrontRQueue)/MEGA,

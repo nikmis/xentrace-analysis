@@ -1,4 +1,4 @@
-CC=clang -Wall -m32 -O3
+CC=clang -g -Wall -m32 -O3
 CPP=clang++ -Wall -m32
 INC=-I../../include
 

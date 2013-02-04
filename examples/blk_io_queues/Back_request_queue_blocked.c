@@ -46,17 +46,14 @@ int back_request_queue_blocked_handler(EventHandler *handler, Event *event)
 
 int back_request_queue_blocked_finalize(EventHandler *handler)
 {
-	printf("QUEUE TIMES\n");
-	print_line();
-	printf(	"Queue BLOCKED:   Unable to add new requests to queue or queue empty.\n"
-		"Queue UNBLOCKED: Can enqueue new incoming requests.\n\n");	
 
 	printf(	"\nBack Request Queue Unblocked           : %15.3f (ms), %5.2f %% ; Blocked : %15.3f (ms), %5.2f %%\n\n",
 			(float)queue_unblocked_time(BackRQueue)/MEGA,
 			(float)queue_unblocked_time(BackRQueue)/get_max_total_time()*100,
 			(float)queue_blocked_time(BackRQueue)/MEGA,
-			(float)(queue_blocked_time(BackRQueue)*100)/get_max_total_time());
+			(float)queue_blocked_time(BackRQueue)/get_max_total_time()*100);
 
+	queue_free_state(&BackRQueue);
 	fclose(brqFP);
 	return 0;
 }
