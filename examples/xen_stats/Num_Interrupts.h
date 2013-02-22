@@ -1,7 +1,7 @@
 #ifndef __HDLR_NUM_INTERRUPTS
 #define __HDLR_NUM_INTERRUPTS
 
-#include "Num_exceptions.h"
+#include "Num_Exceptions.h"
 
 typedef struct NumInterrupts
 {

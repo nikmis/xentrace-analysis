@@ -4,6 +4,7 @@ INC=-I../../include
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
+	CpuList.o\
 	Common.o\
 	Num_Events.o\
 	Num_Exceptions.o\
@@ -29,6 +30,9 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 	$(CC) $(INC) -c $< -o $@
 
 Reader.o: Reader.c Reader.h Macros.h
+	$(CC) $(INC) -c $< -o $@
+
+CpuList.o: CpuList.c CpuList.h list.h Event.h
 	$(CC) $(INC) -c $< -o $@
 
 Common.o: Common.c Common.h Macros.h Externals.h
