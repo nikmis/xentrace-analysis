@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 const int NUM_ANALYSES = 6;
+static volatile sig_atomic_t xentraceKillRcvd = 0;
 
 typedef enum
 {
@@ -17,13 +19,18 @@ typedef enum
 } Options;
 
 char *analyses[NUM_ANALYSES] = {
-	"\0",
-	"../test/Cpu_util.out",
-	"../test/Cpu_wait.out",
-	"../test/Xen_dom_time.out",
-	"../test/blk_queue_io",
-	"../test/Xen_stats.out"
+	"\0",				// ALL_OPTIONS
+	"../test/Cpu_util.out",		// CPU_UTILIZATION
+	"../test/Cpu_wait.out",		// CPU_WAIT
+	"../test/Xen_dom_time.out",	// XEN_DOM_TIME
+	"../test/blk_queue_io",		// DISK_IO
+	"../test/Xen_stats.out"		// XEN_STATS
 };
+
+static void sigint_handler(int sig)
+{
+	xentraceKillRcvd = 1;
+}
 
 void display_usage(void)
 {
@@ -106,23 +113,92 @@ int main(int argc, char *argv[])
 	}
 
 	// Run Xentrace 
-	char *xentrace_argv[10];
+	char *xentraceArgv[10];
 		
-	construct_xentrace_argv(xentrace_argv, opt);
+	construct_xentrace_argv(xentraceArgv, opt);
+	
+	// Setup signal handlers and block SIGINT until fork() & exec() are complete
+	sigset_t origMask, blockMask;
+	struct sigaction sa;
 
-	int xentrace_pid = fork();
+	sigemptyset(&blockMask);
+	sigaddset(&bloclMask, SIGINT);
 
-	switch(xentrace_pid)
+	if(sigprocmask(SIG_BLOCK, &blockMask, &origMask) == -1)
+	{
+		perror("Couldn't set signal mask. Exiting.");
+		exit(0);
+	}
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigint_handler;
+
+	if(sigaction(SIGINT, &sa, NULL) == -1)
+	{
+		perror("Couldn't register signal handler. Exiting.");
+		exit(0);
+	}
+
+	int xentracePid = fork();
+
+	switch(xentracePid)
 	{
 		case -1	: perror("Couldn't fork xentrace");
 			  exit(0);
 		case 0	: // Child 
-			  execvp("xentrace", xentrace_argv);
-			  fprintf(stderr, "Coudln't exec xentrace\n");
+			  // Pending signals are not inherited, so no need to handle them for exec().
+			  execvp("xentrace", xentraceArgv);
+			  perror("Coudln't exec xentrace.");
 			  exit(0);
 		default	: // Parent
-			  // Add signal handlers for killing xentrace.
-
+			  break;
 	}
+
+	// Add signal handlers for killing xentrace.
+
+	// Pause for signal. sigsuspend() atomically pasues for signal.
+	// Handle any pending signals.
+	if((sigsuspend(&origMask) == -1) && (errno != EINTR))
+	{
+		perror("Sigsuspend failed. Exiting.");
+		// Kill xentrace process.
+		kill(xentracePid, SIGINT);
+		exit(0);
+	}
+
+	// Received SIGINT. Kill xentrace.
+	if(kill(xentracePid, SIGINT) == -1)
+	{
+		perror("Couldn't kill xentrace.");
+		fprintf(stderr, "Xentrace pid is %d\n", xentracePid);
+		exit(0);
+	}
+
+	// Signal received and process un-paused. 
+	// Unmask signals.
+	if(sigprocmask(SIG_SETMASK, &origMask, NULL) == -1)
+	{
+		perror("Couldn't unmask signals. Exiting.");
+		exit(0);
+	}
+
+	// Run analysis.
+	int analysisPid = fork();
+
+	switch(analysisPid)
+	{
+		case -1	: perror("Couldn't fork analysis");
+			  exit(0);
+		case 0	: // Child
+			  // exec() analysis 
+		default	: // Parent
+			  break;
+	}
+
+
+
+
+
 	return 0;
 }
