@@ -4,8 +4,10 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-const int NUM_ANALYSES = 6;
+#define NUM_ANALYSES 6
 char *xentraceFileName = "xentrace.out";
 static volatile sig_atomic_t xentraceKillRcvd = 0;
 
@@ -37,7 +39,7 @@ static void sigint_handler(int sig)
 
 void display_usage(void)
 {
-	printf("Usage: $ ./xa [option] [-f] [xentrace-file-name]\n"
+	printf("Usage: $ ./xa [option]\n"
 		"\t-b\t: Run analysis [analysis-name]\n"
 		"\t\t\tall        = Run all analyses\n"
 		"\t\t\tcpu-util   = Cpu utilization\n"
@@ -56,15 +58,16 @@ Options handle_options(int argc, char **argv)
 		return INVALID;	
 	}
 
-	/*
+	
 	if(argc > 3)
 	{
-		if(strcmp(argv[3], "-f"))
+		// If argv[3] == -f and argv[4] != \0
+		if(!strcmp(argv[3], "-f") && strcmp(argv[4], "\0"))
 		{
-			argv[4] = "xentrace.out";
+			xentraceFileName = argv[4];
 		}
 	}
-	*/
+	
 	if(!strcmp(argv[1], "-b"))
 	{
 		if(!strcmp(argv[2], "all"))
@@ -132,6 +135,29 @@ int main(int argc, char *argv[])
 		
 	construct_xentrace_argv(xentraceArgv, opt);
 	
+	// Check existsnce of log file.
+	struct stat sb;
+	while(!stat(xentraceFileName, &sb) && S_ISREG(sb.st_mode))
+	{
+		printf("Filename %s exists. Delete and continue y/n ? : ", xentraceFileName);
+		char c;
+		scanf("%c", &c);
+
+		if((c == 'y') || (c == 'Y'))
+		{
+			if(unlink(xentraceFileName) == -1)
+			{
+				perror("Couldn't delete xentrace log file");
+				exit(0);
+			}
+		}
+		else
+		{
+			printf("Enter new filename : ");
+			scanf("%s", xentraceFileName);
+		}
+	}
+
 	// Setup signal handlers and block SIGINT until fork() & exec() are complete
 	sigset_t origMask, blockMask;
 	struct sigaction sa;
@@ -179,12 +205,12 @@ int main(int argc, char *argv[])
 	{
 		perror("Sigsuspend failed. Exiting.");
 		// Kill xentrace process.
-		kill(xentracePid, SIGINT);
+		kill(xentracePid, SIGTERM);
 		exit(0);
 	}
 
 	// Received SIGINT. Kill xentrace.
-	if(kill(xentracePid, SIGINT) == -1)
+	if(kill(xentracePid, SIGTERM) == -1)
 	{
 		perror("Couldn't kill xentrace.");
 		fprintf(stderr, "Xentrace pid is %d\n", xentracePid);
