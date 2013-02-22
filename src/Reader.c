@@ -10,10 +10,10 @@
 void reader_init(Reader *reader, const char *filename)
 {
 	int i = 0;
-	if((reader->fp = fopen(filename, "rb")) == NULL)
+	if((reader->fp = fopen(filename, "r")) == NULL)
 	{
-		strerror(errno);
-		printf("Usage: ./a.out <filename>\n");
+		perror("Reader: Couldn't open log file");
+		printf("Usage: ./a.out <filename>. Given filename %s\n", filename);
 		exit(0);
 	}
 
