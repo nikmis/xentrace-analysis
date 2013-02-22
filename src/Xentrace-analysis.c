@@ -3,8 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/errno.h>
 
 const int NUM_ANALYSES = 6;
+char *xentraceFileName = "xentrace.out";
 static volatile sig_atomic_t xentraceKillRcvd = 0;
 
 typedef enum
@@ -29,19 +31,21 @@ char *analyses[NUM_ANALYSES] = {
 
 static void sigint_handler(int sig)
 {
-	xentraceKillRcvd = 1;
+	if(!xentraceKillRcvd)
+		xentraceKillRcvd = 1;
 }
 
 void display_usage(void)
 {
-	printf("Usage: $ ./xa [option] [analysis-name]\n"
-		"\t-b\t: Only run analysis..\n"
+	printf("Usage: $ ./xa [option] [-f] [xentrace-file-name]\n"
+		"\t-b\t: Run analysis [analysis-name]\n"
 		"\t\t\tall        = Run all analyses\n"
 		"\t\t\tcpu-util   = Cpu utilization\n"
 		"\t\t\tsched-lat  = Cpu scheduling latency\n"
 		"\t\t\txen-time   = Time spent inside xen\n"
 		"\t\t\tdisk-queue = Disk i/o queue states and wait times\n"
-		"\t\t\tstats      = Xen event stats\n\n");
+		"\t\t\tstats      = Xen event stats\n\n"
+		);
 }
 
 
@@ -52,7 +56,16 @@ Options handle_options(int argc, char **argv)
 		return INVALID;	
 	}
 
-	else if(!strcmp(argv[1], "-b"))
+	/*
+	if(argc > 3)
+	{
+		if(strcmp(argv[3], "-f"))
+		{
+			argv[4] = "xentrace.out";
+		}
+	}
+	*/
+	if(!strcmp(argv[1], "-b"))
 	{
 		if(!strcmp(argv[2], "all"))
 			return ALL_OPTIONS;
@@ -71,6 +84,8 @@ Options handle_options(int argc, char **argv)
 			return INVALID;
 		}
 	}
+
+
 	
 	return INVALID;
 }
@@ -97,7 +112,7 @@ void construct_xentrace_argv(char *argv[10], Options opt)
 					  break;
 	}
 
-	argv[6] = "xentrace.out";
+	argv[6] = xentraceFileName;
 	argv[7] = NULL;
 }
 
@@ -122,7 +137,7 @@ int main(int argc, char *argv[])
 	struct sigaction sa;
 
 	sigemptyset(&blockMask);
-	sigaddset(&bloclMask, SIGINT);
+	sigaddset(&blockMask, SIGINT);
 
 	if(sigprocmask(SIG_BLOCK, &blockMask, &origMask) == -1)
 	{
@@ -140,6 +155,7 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
+	
 	int xentracePid = fork();
 
 	switch(xentracePid)
@@ -154,7 +170,7 @@ int main(int argc, char *argv[])
 		default	: // Parent
 			  break;
 	}
-
+	
 	// Add signal handlers for killing xentrace.
 
 	// Pause for signal. sigsuspend() atomically pasues for signal.
@@ -192,13 +208,25 @@ int main(int argc, char *argv[])
 			  exit(0);
 		case 0	: // Child
 			  // exec() analysis 
+
+			  if(opt == ALL_OPTIONS)
+			  {
+				  // exec() all analysis.
+			  }
+			  else
+			  {
+				  // extrace filename from path.
+				  char *filename = strrchr(analyses[opt], '/');
+				  filename++;  
+
+				  execl(analyses[opt], filename, xentraceFileName, (char *)NULL); 
+				  perror("Coudln't exec analysis.");
+				  exit(0);
+			  }
+
 		default	: // Parent
 			  break;
 	}
-
-
-
-
 
 	return 0;
 }
