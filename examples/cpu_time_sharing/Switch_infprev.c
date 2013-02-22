@@ -26,9 +26,10 @@ int switch_infprev_init(EventHandler *handler)
 void switch_infprev_reset(void)
 {
 	CpuLastRuntime *tmpCLR;
+	CpuLastRuntime *t;
 	list_head *head = &(cpuLastRuntime.cpuList);
 
-	list_for_each_entry_reverse(tmpCLR, head, cpuList)
+	list_for_each_entry_safe(tmpCLR, t, head, cpuList)
 	{
 		free(tmpCLR);
 	}
@@ -80,9 +81,10 @@ int switch_infprev_handler(EventHandler *handler, Event *event)
 int switch_infprev_finalize(EventHandler *handler)
 {
 	CpuLastRuntime *tmpCLR;
+	CpuLastRuntime *t;
 	list_head *head = &(cpuLastRuntime.cpuList);
 
-	list_for_each_entry_reverse(tmpCLR, head, cpuList)
+	list_for_each_entry_safe(tmpCLR, t, head, cpuList)
 	{
 		free(tmpCLR);
 	}
