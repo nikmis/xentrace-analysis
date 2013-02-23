@@ -12,7 +12,7 @@ NumEvs numInterruptsInXen;
 
 int num_interrupts_in_xen_init(EventHandler *handler)
 {
-	return	num_ev_init(&numInterruptsInXen);
+	return	num_ev_in_xen_init(&numInterruptsInXen);
 }
 
 
