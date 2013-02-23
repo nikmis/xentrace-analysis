@@ -37,7 +37,6 @@ int num_ev_handler(NumEvs *dat, Event *event)
 	
 	list_head *head = &(dat[domId].numTypes.typeList);
 	NumTypes  *tmpNumTypes;
-	NumTypes  *t;
 
 	if(!list_empty(head))
 	{
@@ -72,14 +71,17 @@ int num_ev_in_xen_handler(NumEvs *dat, Event *event)
 	list_head *head = &(dat->numTypes.typeList);
 	NumTypes  *tmpNumTypes;
 
-	list_for_each_entry(tmpNumTypes, head, typeList)
+	if(!list_empty(head))
 	{
-		if(tmpNumTypes->type == type)
+		list_for_each_entry(tmpNumTypes, head, typeList)
 		{
-			tmpNumTypes->totalTypeCount++;
-			dat->totalEvsCount++;
+			if(tmpNumTypes->type == type)
+			{
+				tmpNumTypes->totalTypeCount++;
+				dat->totalEvsCount++;
 
-			return SUCCESS;
+				return SUCCESS;
+			}
 		}
 	}
 
