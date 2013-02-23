@@ -12,7 +12,7 @@ NumEvs numExceptionsInXen;
 
 int num_exceptions_in_xen_init(EventHandler *handler)
 {
-	return num_ev_init(&numExceptionsInXen);	
+	return num_ev_in_xen_init(&numExceptionsInXen);	
 }
 
 
