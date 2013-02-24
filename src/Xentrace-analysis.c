@@ -45,10 +45,9 @@ void display_usage(void)
 		"\txen-time   = Time spent inside xen\n"
 		"\tdisk-queue = Disk i/o queue states and wait times\n"
 		"\tstats      = Xen event stats\n"
-		"\t-a\t: Collect all xentrace events\n"
 		"\t-f\t: Log file name\n"
 		"Example: $ ./xa xen-time\n"
-		"Example: $ ./xa cpu-util -f xentrace.out -a\n\n"
+		"Example: $ ./xa cpu-util -f xentrace.out\n\n"
 		);
 }
 
@@ -63,17 +62,13 @@ Options handle_options(int argc, char **argv)
 	
 	if(argc > 2)
 	{
-		short i = 0;
-		// If argv[2] == -f or argv[4] == -f and argv[3|5] != \0
-		if((!strcmp(argv[i=2], "-f") || !strcmp(argv[i=4], "-f")) && strcmp(argv[i+1], "\0"))
+		if(!strcmp(argv[2], "-f") && strcmp(argv[3], "\0"))
 		{
-			xentraceFileName = argv[i+1];
+			xentraceFileName = argv[3];
 		}
 	}
 	
-	if(!strcmp(argv[1], "all"))
-		return ALL_OPTIONS;
-	else if(!strcmp(argv[1], "cpu-util"))
+	if(!strcmp(argv[1], "cpu-util"))
 		return CPU_UTILIZATION;
 	else if(!strcmp(argv[1], "sched-lat"))
 		return CPU_WAIT;
@@ -83,12 +78,6 @@ Options handle_options(int argc, char **argv)
 		return DISK_IO;
 	else if(!strcmp(argv[1], "stats"))
 		return XEN_STATS;
-	else
-	{
-		return INVALID;
-	}
-
-
 	
 	return INVALID;
 }
@@ -192,6 +181,8 @@ int main(int argc, char *argv[])
 			  exit(0);
 		case 0	: // Child 
 			  // Pending signals are not inherited, so no need to handle them for exec().
+			  printf("XA: About to run xentrace\n");
+
 			  execvp("xentrace", xentraceArgv);
 			  perror("Coudln't exec xentrace.");
 			  exit(0);
@@ -237,20 +228,14 @@ int main(int argc, char *argv[])
 		case 0	: // Child
 			  // exec() analysis 
 
-			  if(opt == ALL_OPTIONS)
-			  {
-				  // exec() all analysis.
-			  }
-			  else
-			  {
-				  // extrace filename from path.
-				  char *filename = strrchr(analyses[opt], '/');
-				  filename++;  
+			  printf("XA: About to run analysis\n");
+			  // extrace filename from path.
+			  char *filename = strrchr(analyses[opt], '/');
+			  filename++;  
 
-				  execl(analyses[opt], filename, xentraceFileName, (char *)NULL); 
-				  perror("Coudln't exec analysis.");
-				  exit(0);
-			  }
+			  execl(analyses[opt], filename, xentraceFileName, (char *)NULL); 
+			  perror("Coudln't exec analysis.");
+			  exit(0);
 
 		default	: // Parent
 			  break;
