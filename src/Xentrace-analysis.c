@@ -39,53 +39,53 @@ static void sigint_handler(int sig)
 
 void display_usage(void)
 {
-	printf("Usage: $ ./xa [option]\n"
-		"\t-b\t: Run analysis [analysis-name]\n"
-		"\t\t\tall        = Run all analyses\n"
-		"\t\t\tcpu-util   = Cpu utilization\n"
-		"\t\t\tsched-lat  = Cpu scheduling latency\n"
-		"\t\t\txen-time   = Time spent inside xen\n"
-		"\t\t\tdisk-queue = Disk i/o queue states and wait times\n"
-		"\t\t\tstats      = Xen event stats\n\n"
+	printf("Usage: $ ./xa [anaysis-name] [[optional]]\n"
+		"\tcpu-util   = Cpu utilization\n"
+		"\tsched-lat  = Cpu scheduling latency\n"
+		"\txen-time   = Time spent inside xen\n"
+		"\tdisk-queue = Disk i/o queue states and wait times\n"
+		"\tstats      = Xen event stats\n"
+		"\t-a\t: Collect all xentrace events\n"
+		"\t-f\t: Log file name\n"
+		"Example: $ ./xa xen-time\n"
+		"Example: $ ./xa cpu-util -f xentrace.out -a\n\n"
 		);
 }
 
 
 Options handle_options(int argc, char **argv)
 {
-	if(argc < 3) 
+	if(argc < 2) 
 	{
 		return INVALID;	
 	}
 
 	
-	if(argc > 3)
+	if(argc > 2)
 	{
-		// If argv[3] == -f and argv[4] != \0
-		if(!strcmp(argv[3], "-f") && strcmp(argv[4], "\0"))
+		short i = 0;
+		// If argv[2] == -f or argv[4] == -f and argv[3|5] != \0
+		if((!strcmp(argv[i=2], "-f") || !strcmp(argv[i=4], "-f")) && strcmp(argv[i+1], "\0"))
 		{
-			xentraceFileName = argv[4];
+			xentraceFileName = argv[i+1];
 		}
 	}
 	
-	if(!strcmp(argv[1], "-b"))
+	if(!strcmp(argv[1], "all"))
+		return ALL_OPTIONS;
+	else if(!strcmp(argv[1], "cpu-util"))
+		return CPU_UTILIZATION;
+	else if(!strcmp(argv[1], "sched-lat"))
+		return CPU_WAIT;
+	else if(!strcmp(argv[1], "xen-time"))
+		return XEN_DOM_TIME;
+	else if(!strcmp(argv[1], "disk-queue"))
+		return DISK_IO;
+	else if(!strcmp(argv[1], "stats"))
+		return XEN_STATS;
+	else
 	{
-		if(!strcmp(argv[2], "all"))
-			return ALL_OPTIONS;
-		else if(!strcmp(argv[2], "cpu-util"))
-			return CPU_UTILIZATION;
-		else if(!strcmp(argv[2], "sched-lat"))
-			return CPU_WAIT;
-		else if(!strcmp(argv[2], "xen-time"))
-			return XEN_DOM_TIME;
-		else if(!strcmp(argv[2], "disk-queue"))
-			return DISK_IO;
-		else if(!strcmp(argv[2], "stats"))
-			return XEN_STATS;
-		else
-		{
-			return INVALID;
-		}
+		return INVALID;
 	}
 
 
@@ -106,11 +106,13 @@ void construct_xentrace_argv(char *argv[10], Options opt)
 	{
 		case DISK_IO		: argv[5] = "0x0040f000";
 					  break;
-		case ALL_OPTIONS 	:
 		case CPU_UTILIZATION 	: 
-		case CPU_WAIT		: 
+		case CPU_WAIT		: argv[5] = "0x0002f000";
+					  break;
 		case XEN_DOM_TIME	: 
-		case XEN_STATS		: 
+		case XEN_STATS		: argv[5] = "0x0020f000";
+					  break;	
+		case ALL_OPTIONS 	:
 		default			: argv[5] = "all";
 					  break;
 	}
@@ -182,7 +184,7 @@ int main(int argc, char *argv[])
 	}
 
 	
-	int xentracePid = fork();
+	pid_t xentracePid = fork();
 
 	switch(xentracePid)
 	{
@@ -226,7 +228,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Run analysis.
-	int analysisPid = fork();
+	pid_t analysisPid = fork();
 
 	switch(analysisPid)
 	{
