@@ -1,9 +1,10 @@
-CC=clang -g -Wall -m32
+CC=gcc -g -Wall -m32
 INC=-I../../include
 
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
+	CpuList.o\
 	Switch_infprev.o\
 	Switch_infnext.o\
 	Domain_wake.o\
@@ -26,6 +27,9 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 	$(CC) $(INC) -c $< -o $@
 
 Reader.o: Reader.c Reader.h Macros.h
+	$(CC) $(INC) -c $< -o $@
+
+CpuList.o: CpuList.c CpuList.h list.h Event.h
 	$(CC) $(INC) -c $< -o $@
 
 Switch_infprev.o: Switch_infprev.h Switch_infprev.c Macros.h Externals.h
