@@ -20,7 +20,7 @@ vpath %.c ../../src
 vpath %.c .
 
 all: main.c $(OBJS) Macros.h Externals.h
-	$(CC) $(INC) $<  *.o -o ../../test/Xen_stats.out
+	$(CC) $(INC) $<  *.o -o ../../bin/Xen_stats.out
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -60,5 +60,5 @@ Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 clean: 
-	rm -rf ../../test/Xen_stats.out
+	rm -rf ../../bin/Xen_stats.out
 	rm -rf *.o

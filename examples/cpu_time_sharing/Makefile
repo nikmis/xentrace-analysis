@@ -15,7 +15,7 @@ vpath %.c ../../src
 vpath %.c .
 
 all: main.c $(OBJS) Macros.h Externals.h
-	$(CC) $(INC) $<  *.o -o ../../test/Cpu_util.out	
+	$(CC) $(INC) $<  *.o -o ../../bin/Cpu_util.out	
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -40,5 +40,5 @@ Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h Switch_infpre
 	$(CC) $(INC) -c Lost_records.c
 
 clean: 
-	rm -rf ../../test/Cpu_util.out
+	rm -rf ../../bin/Cpu_util.out
 	rm -rf *.o

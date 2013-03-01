@@ -17,7 +17,7 @@ vpath %.c ../../src
 vpath %.c .
 
 all: main.c $(OBJS) Macros.h Externals.h
-	$(CC) $(INC) $<  *.o -o ../../test/Cpu_wait.out	
+	$(CC) $(INC) $<  *.o -o ../../bin/Cpu_wait.out	
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -48,5 +48,5 @@ Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h Switch_sched.
 	$(CC) $(INC) -c Lost_records.c
 
 clean: 
-	rm -rf ../../test/Cpu_wait.out
+	rm -rf ../../bin/Cpu_wait.out
 	rm -rf *.o

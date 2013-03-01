@@ -2,6 +2,8 @@
 *.out
 *.swp
 *.swo
+*.dat
+bin/
 cscope.files
 tags
 TODO.txt

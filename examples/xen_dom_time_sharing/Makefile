@@ -15,7 +15,7 @@ vpath %.c ../../src
 vpath %.c .
 
 all: main.c $(OBJS) Macros.h Externals.h Exit_to_xen.h Exit_to_guest.h
-	$(CC) $(INC) $<  $(OBJS) -o ../../test/Xen_dom_time.out	
+	$(CC) $(INC) $<  $(OBJS) -o ../../bin/Xen_dom_time.out	
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -40,5 +40,5 @@ Lost_records.o: Lost_records.c Lost_records.h Macros.h Externals.h
 	$(CC) $(INC) -c $< -o $@
 
 clean: 
-	rm -rf ../../test/Xen_dom_time.out
+	rm -rf ../../bin/Xen_dom_time.out
 	rm -rf *.o

@@ -34,12 +34,12 @@ vpath %.c .
 all: main.o Histogram.o
 
 main.o: main.c $(OBJS) Macros.h Externals.h Queue_state.h Wait_state.h Back_inflight_queue_blocked.h Back_inflight_queue_unblocked.h Back_request_queue_blocked.h Back_request_queue_unblocked.h Front_grant_queue_blocked.h Front_grant_queue_unblocked.h Front_request_queue_blocked.h Front_request_queue_unblocked.h Front_shared_ring_queue_blocked.h Front_shared_ring_queue_unblocked.h Front_shared_ring_resp_queue_blocked.h Front_shared_ring_resp_queue_unblocked.h Back_request_queue_interrupt_send.h Back_request_queue_interrupt_receive.h
-	$(CC) $(INC) $<  $(OBJS) -o ../../test/blk_queue_io
+	$(CC) $(INC) $<  $(OBJS) -o ../../bin/blk_queue_io
 	rm -f *.o
 
 Histogram.o: Histogram.cpp Histogram.h histo.cpp
 	$(CPP) -c Histogram.cpp -o $@
-	$(CPP) Histogram.o histo.cpp -o ../../test/histogram
+	$(CPP) Histogram.o histo.cpp -o ../../bin/histogram
 	rm -f *.o
 
 Event.o: Event.c Event.h Macros.h
@@ -112,5 +112,5 @@ Lost_records.o: Lost_records.c Lost_records.h Front_shared_ring_queue_unblocked.
 	$(CC) $(INC) -c $< -o $@
 
 clean: 
-	rm -rf ../../test/blk_queue_io.out
+	rm -rf ../../bin/blk_queue_io.out
 	rm -rf *.o
