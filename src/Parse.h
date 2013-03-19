@@ -24,9 +24,9 @@ typedef struct Parse
 	int setup_flag;
 
 	// Methods
-	void 	(*setup)(Parse *p)
+	void 	(*setup)(Parse *self)
 	void	(*init_cpu_offset)(Parse *self);
-	Event	(*next_event_for_cpu)(Parse *self, int cpu);
+	Event	(*get_next_event)(Parse *self);
 } Parse;
 
 #endif

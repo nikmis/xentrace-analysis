@@ -4,25 +4,23 @@
 #include "Macros.h"
 #include "Parse.h"
 
-void parse_setup(Parse *p)
+void parse_setup(Parse *self)
 {
-	if(p->setup_flag)
+	if(self->setup_flag)
 		return;
 	
 	// Init cpuOffset array
-	memset(p->cpuOff, 0, MAX_CPUS*sizeof(struct CpuOffset));
+	memset(self->cpuOff, 0, MAX_CPUS*sizeof(struct CpuOffset));
 
-	p->h.init();
+	self->h.init();
 		
-	p->init_cpu_offset(p);
-	p->setup_flag = 1;
+	self->init_cpu_offset(p);
+	self->setup_flag = 1;
 }
 
 void parse_init_cpu_offset(Parse *self)
 {
 	Event tmpev;
-	
-	self->numCpus = 0;
 
 	while(!feof(fp))
 	{
@@ -46,7 +44,7 @@ void parse_init_cpu_offset(Parse *self)
 	rewind(fp);
 }
 
-Event parse_next_event_for_cpu(Parse *self, int cpu)
+Event parse_get_next_event(Parse *self)
 {
 	// retrieve ev with smallest ns
 	CpuOffset coff = self->h.pop(&h);
@@ -55,17 +53,17 @@ Event parse_next_event_for_cpu(Parse *self, int cpu)
 	
 	fseek(fp, offt, SEEK_SET);
 
-	Event tmpev;
+	Event nextev;
 	
 	// Push next ev for retrieved cpu on heap
 	while(!feof)
 	{
-		if(parse_next_event(&tmpev, p->fp) != SUCCESS)
+		if(parse_next_event(&nextev, p->fp) != SUCCESS)
 			break;
-		
-		if(coff.ev.cpu == tmpev.cpu)
+		// If cpu of next ev is same as popped ev
+		if(coff.ev.cpu == nextev.cpu)
 		{
-			self->h.push(&h, tmpev);
+			self->h.push(&h, nextev);
 			break;
 		}
 	}
@@ -77,9 +75,11 @@ Event parse_next_event_for_cpu(Parse *self, int cpu)
 
 Parse par =
 {
+	.setup_flag = 0,
+	.numCpus = 0,
 	.setup = parse_setup,
 	.init_cpu_offset = parse_init_cpu_offset,
-	.next_event_for_cpu = parse_next_event_for_cpu,
+	.get_next_event = parse_get_next_event,
 };
 
 Parse* get_parse()
@@ -97,10 +97,6 @@ int return_next_event(FILE *fp, Event *ev)
 	// ev = min(ns(cpu-list))
 	// update offset table
 
-	for(int cpu = 0; cpu < numCpus; cpu++)
-	{
-		h.push(next_event_for_cpu(cpuOff, MAX_CPUS, cpu));
-	}
 	
 	Event tmpev = h.pop(&h);
 
