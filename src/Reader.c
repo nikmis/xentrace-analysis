@@ -23,7 +23,7 @@ void reader_init(Reader *reader, const char *filename)
 	init_cpulist(reader->cpus);
 
 	/* Init and sort logs */
-//	sort_events_by_ns(reader->fp);
+	//sort_events_by_ns(reader->fp);
 
 	
 	Parse *p = get_parse();

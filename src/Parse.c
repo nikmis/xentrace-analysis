@@ -67,7 +67,7 @@ int parse_get_next_event(Parse *self, Event *ev)
 	while(!feof(self->fp))
 	{
 		if(parse_next_event(&nextev, self->fp) != SUCCESS)
-			return FAIL;
+			break;
 		// If cpu of next ev is same as popped ev
 		if(coff.ev.cpu == nextev.cpu)
 		{

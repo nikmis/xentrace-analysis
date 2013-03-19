@@ -82,7 +82,7 @@ int mh_pop(MinHeap *mheap, CpuOffset *min)
 	
 	if(mheap->num <= 0)	
 	{
-		fprintf(stderr, "Parseheap.c: Pop() from empty heap\n");
+		//fprintf(stderr, "Parseheap.c: Pop() from empty heap\n");
 		return FAIL;
 	}
 	else
