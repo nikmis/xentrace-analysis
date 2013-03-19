@@ -76,24 +76,26 @@ void mh_bubble_down(MinHeap *mheap, int p)
 	}
 }
 
-CpuOffset mh_pop(MinHeap *mheap)
+int mh_pop(MinHeap *mheap, CpuOffset *min)
 {
-	CpuOffset min;
-
+	CpuOffset tmpmin;
+	
 	if(mheap->num <= 0)	
 	{
 		fprintf(stderr, "Parseheap.c: Pop() from empty heap\n");
-		exit(0);
+		return FAIL;
 	}
 	else
 	{
-		min = mheap->mh[1];
+		tmpmin = mheap->mh[1];
 		mheap->mh[1] = mheap->mh[mheap->num];
 		mheap->num--;
 		mh_bubble_down(mheap, 1);
 	}
 
-	return min;
+	memcpy(min, &tmpmin, sizeof(CpuOffset));
+
+	return SUCCESS;
 }
 
 void make_heap(MinHeap *mheap, CpuOffset s[], int n)
@@ -104,6 +106,7 @@ void make_heap(MinHeap *mheap, CpuOffset s[], int n)
 		mh_push(mheap, s[i]);
 }
 
+/*
 void heap_sort(CpuOffset s[], int n)
 {
 	MinHeap mh;
@@ -116,7 +119,6 @@ void heap_sort(CpuOffset s[], int n)
 	}
 
 }
-/*
 void print_array(CpuOffset s[], int n)
 {
 	for(int i = 0; i < n; i++)

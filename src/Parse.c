@@ -14,7 +14,8 @@ void parse_setup(Parse *self, FILE *fp)
 	// Init cpuOffset array
 	memset(self->cpuOff, 0, MAX_CPUS*sizeof(struct CpuOffset));
 
-	self->h.init(&self->h);
+	//self->h.init(&self->h);
+	mh_init(&self->h);
 	self->fp = fp;		
 	self->init_cpu_offset(self);
 	self->setup_flag = 1;
@@ -46,10 +47,15 @@ void parse_init_cpu_offset(Parse *self)
 	rewind(self->fp);
 }
 
-Event parse_get_next_event(Parse *self)
+int parse_get_next_event(Parse *self, Event *ev)
 {
 	// retrieve ev with smallest ns
-	CpuOffset coff = self->h.pop(&self->h);
+	CpuOffset coff; 
+	
+	if(self->h.pop(&self->h, &coff) != SUCCESS)
+		return FAIL;
+
+	memcpy(ev, &coff.ev, sizeof(Event));
 
 	off_t offt = coff.nextOffset;
 	
@@ -61,7 +67,7 @@ Event parse_get_next_event(Parse *self)
 	while(!feof(self->fp))
 	{
 		if(parse_next_event(&nextev, self->fp) != SUCCESS)
-			break;
+			return FAIL;
 		// If cpu of next ev is same as popped ev
 		if(coff.ev.cpu == nextev.cpu)
 		{
@@ -74,10 +80,10 @@ Event parse_get_next_event(Parse *self)
 
 	rewind(self->fp);
 
-	return coff.ev;
+	return SUCCESS;
 }
 
-Parse par =
+struct Parse par =
 {
 	.setup_flag = 0,
 	.numCpus = 0,
@@ -91,11 +97,15 @@ Parse* get_parse()
 	return &par;
 }
 
-int parse_return_next_event(FILE *fp, Event *ev)
+int parse_return_next_event(Event *ev)
 {
 	Parse *p = get_parse();
-	Event tmpev = p->get_next_event(p);	
+	Event tmpev;
+
+	if(p->get_next_event(p, &tmpev) == FAIL)
+		return FAIL;
+
 	memcpy(ev, &tmpev, sizeof(Event));
 
-	return 0;
+	return SUCCESS;
 }

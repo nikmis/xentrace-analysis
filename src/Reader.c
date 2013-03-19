@@ -6,6 +6,7 @@
 #include "Macros.h"
 #include "Reader.h"
 #include "CpuList.h"
+#include "Parse.h"
 
 void reader_init(Reader *reader, const char *filename)
 {
@@ -22,8 +23,12 @@ void reader_init(Reader *reader, const char *filename)
 	init_cpulist(reader->cpus);
 
 	/* Init and sort logs */
-	sort_events_by_ns(reader->fp);
+//	sort_events_by_ns(reader->fp);
 
+	
+	Parse *p = get_parse();
+	p->setup(p, reader->fp);
+	
 	/* Init Hash table */
 	reader->handler_array = (EventHandler *)malloc(sizeof(struct EventHandler) * MAX_EVENTS); 
 
@@ -54,15 +59,15 @@ void reader_exit(Reader *reader)
 int reader_loop(Reader *reader)
 {
 	int ret = 0;
-	Event event;
 
+	Event event;
 	clear_event(&event);
 
 	evh_call_initializers(reader);
 
 	do
 	{
-		ret = return_next_event(&event);
+		ret = parse_return_next_event(&event);
 		if (ret == FAIL)
 			break;
 		evh_call_handlers(reader, &event);
@@ -74,10 +79,11 @@ int reader_loop(Reader *reader)
 	/* Make sure to call get_total_time() before calling finalizers as this
 	 * data maybe used by some finalizers */
 	/* DONT MOVE THIS FUNC CALL */
-	float totalTime = get_total_time(reader->cpus)/MEGA;
+	//float totalTime = get_total_time(reader->cpus)/MEGA;
 
 	evh_call_finalizers(reader);
 
+	/*
 	printf("LOG COLLECTION\n");
 	print_line();
 
@@ -86,7 +92,7 @@ int reader_loop(Reader *reader)
 	printf("\nAverage time spent collecting records is %15.3f (ms)\n", (float)get_avg_total_time()/MEGA);
 	printf("Total CPU time spent collecting records is %15.3f (ms) \n", totalTime);
 	printf("\nTotal event records collected = %llu\n", get_total_event_records());
-
+	*/
 	return SUCCESS;
 }
 
