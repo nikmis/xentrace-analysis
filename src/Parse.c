@@ -91,18 +91,8 @@ Parse* get_parse()
 int return_next_event(FILE *fp, Event *ev)
 {
 	Parse *p = get_parse();
-
-	// calc num cpus and fill hash table
-	// Read next event
-	// ev = min(ns(cpu-list))
-	// update offset table
-
 	
-	Event tmpev = h.pop(&h);
-
-	memcpy(ev, tmpev, sizeof(Event));
-
-	h.push(next_event_for_cpu(cpuOff, MAX_CPUS, ev->cpu));
+	memcpy(ev, p->get_next_event(p), sizeof(Event));
 
 	return 0;
 }
