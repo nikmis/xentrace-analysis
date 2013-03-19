@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "Parse.h"
 #include "Macros.h"
-#include "ParseHeap.h"
 
 void mh_init(MinHeap *mheap)
 {
@@ -77,10 +78,13 @@ void mh_bubble_down(MinHeap *mheap, int p)
 
 CpuOffset mh_pop(MinHeap *mheap)
 {
-	CpuOffset min = 0;
+	CpuOffset min;
 
 	if(mheap->num <= 0)	
+	{
 		fprintf(stderr, "Parseheap.c: Pop() from empty heap\n");
+		exit(0);
+	}
 	else
 	{
 		min = mheap->mh[1];

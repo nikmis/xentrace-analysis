@@ -2,8 +2,16 @@
 #define __PARSEHEAP_H
 
 #include <stdio.h>
-#include "Parse.h"
+//#include "Parse.h"
 #include "Macros.h"
+
+typedef struct CpuOffset
+{
+	char 		cpuFlag;	// bool flag
+	off_t 		nextOffset;
+	Event		ev;
+
+} CpuOffset;
 
 typedef struct MinHeap
 {
@@ -25,3 +33,5 @@ void mh_bubble_down(MinHeap *mheap, int p);
 CpuOffset mh_pop(MinHeap *mheap);
 void make_heap(MinHeap *mheap, CpuOffset s[], int n);
 void heap_sort(CpuOffset s[], int n);
+
+#endif
