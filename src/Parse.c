@@ -12,7 +12,7 @@ void parse_setup(Parse *self)
 	// Init cpuOffset array
 	memset(self->cpuOff, 0, MAX_CPUS*sizeof(struct CpuOffset));
 
-	self->h.init();
+	self->h.init(&self->h);
 		
 	self->init_cpu_offset(p);
 	self->setup_flag = 1;
@@ -36,7 +36,7 @@ void parse_init_cpu_offset(Parse *self)
 			self->numCpus++;
 
 			// Push ev->ns on heap
-			p->h.push(&h, self->cpuOff[tmpev.cpu]); 
+			self->h.push(&self->h, self->cpuOff[tmpev.cpu]); 
 		}
 	}
 
@@ -47,7 +47,7 @@ void parse_init_cpu_offset(Parse *self)
 Event parse_get_next_event(Parse *self)
 {
 	// retrieve ev with smallest ns
-	CpuOffset coff = self->h.pop(&h);
+	CpuOffset coff = self->h.pop(&self->h);
 
 	off_t offt = coff.nextOffset;
 	
@@ -63,7 +63,7 @@ Event parse_get_next_event(Parse *self)
 		// If cpu of next ev is same as popped ev
 		if(coff.ev.cpu == nextev.cpu)
 		{
-			self->h.push(&h, nextev);
+			self->h.push(&self->h, nextev);
 			break;
 		}
 	}

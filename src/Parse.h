@@ -3,6 +3,7 @@
 
 #include "Event.h"
 #include "Macros.h"
+#include "ParseHeap.h"
 
 typedef struct CpuOffset
 {
@@ -16,7 +17,7 @@ typedef struct Parse
 {
 	// Data
 	CpuOffset	cpuOff[MAX_CPUS];
-	Heap 		h;
+	MinHeap		h;
 	FILE* 		fp;
 	int 		numCpus;
 
