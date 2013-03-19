@@ -10,6 +10,8 @@
 #define MAX_DOMS	25
 #define MAX_VCPUS	16
 #define MAX_EVENTS	200
+#define MAX_CPUS	32
+
 #define CPU_FREQ	2.4
 #define MEGA		1000000
 
