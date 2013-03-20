@@ -19,8 +19,8 @@ void reader_init(Reader *reader, const char *filename)
 	}
 
 	/* Init Cpu List */
-	reader->cpus = (CpuList *) malloc(sizeof(CpuList));
-	init_cpulist(reader->cpus);
+	//reader->cpus = (CpuList *) malloc(sizeof(CpuList));
+	//init_cpulist(reader->cpus);
 
 	/* Init and sort logs */
 	//sort_events_by_ns(reader->fp);
@@ -51,7 +51,7 @@ void reader_exit(Reader *reader)
 
 	free(reader->handler_array);
 	free_events();
-	free_cpulist(reader->cpus);
+	//free_cpulist(reader->cpus);
 
 	return;
 }
@@ -72,7 +72,7 @@ int reader_loop(Reader *reader)
 			break;
 		evh_call_handlers(reader, &event);
 
-		update_cpulist(reader->cpus, &event);
+		//update_cpulist(reader->cpus, &event);
 
 	} while(!feof(reader->fp)); /* Update condition to check for sorted array not fp */
 

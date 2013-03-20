@@ -23,14 +23,15 @@ typedef struct Event
  * 		 Also remove t_rec struct and use only Event struct
  *
  * This structure represents a single trace buffer record.
-   Similar to Event struct above
-   For Anton's Xen TT only */
+ Similar to Event struct above
+ For Anton's Xen TT only */
 typedef struct t_rec 
 {
-    unsigned long long cycles;          /* cycle counter timestamp */
-    unsigned long long ns;          	/* nano seconds timestamp */
-    unsigned int event;			/* event ID                */
-    unsigned long data[5];		/* event data items        */
+	unsigned int cpu;
+	unsigned long long cycles;          /* cycle counter timestamp */
+	unsigned long long ns;          	/* nano seconds timestamp */
+	unsigned int event;			/* event ID                */
+	unsigned long data[5];		/* event data items        */
 } t_rec;
 
 /* Helper functions */

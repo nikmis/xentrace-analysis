@@ -61,20 +61,7 @@ int parse_next_event(Event *ev, FILE *fp)
 /* CODE CLEANUP: Modify the Event reading code to incorporate 32, 64 bit compatibility.
  *               Also remove t_rec struct and use only Event struct
  */  
-	unsigned int cpu;
-	int i = 0;
 	t_rec rec;
-
-	if(fread(&cpu, sizeof(cpu), 1, fp) != 1)
-	{
-		if(!feof(fp))
-		{
-			fprintf(stderr, "%s:%d: File read failed - failed to read cpu id\n", __FILE__, __LINE__);
-		}
-
-		return FAIL;
-
-	}
 
 	if(fread(&rec, sizeof(rec), 1, fp) != 1)
 	{
@@ -89,13 +76,14 @@ int parse_next_event(Event *ev, FILE *fp)
 	printf("cpu:%u, cycles:%llu, ns:%llu, event:%x, data0:%lx, data1:%lx, data2:%lx, data3:%lx, data4:%lx\n", 
 			cpu, rec.cycles, rec.ns, rec.event, rec.data[0], rec.data[1], rec.data[2], rec.data[3], rec.data[4]);
 	*/
-	ev->cpu = cpu;
+	ev->cpu = rec.cpu;
 	ev->event_id = rec.event;
 	ev->tsc = rec.cycles;
 	ev->ns = rec.ns;
 	ev->lastNs = 0;
 	ev->n_data = MAX_EV_DATA;
 
+	int i;
 	for(i = 0; i < MAX_EV_DATA; i++)
 	{
 		ev->data[i] = rec.data[i];
@@ -161,11 +149,7 @@ void free_events(void)
  */
 void clear_event(Event *ev)
 {
-	ev->event_id = 0;
-	ev->n_data = 0;
-	ev->tsc_in = 0;
-	ev->tsc = 0;
-	memset(ev->data, 0, MAX_EV_DATA);
+	memset(ev, 0, sizeof(Event));
 }
 
 /* Description:	Helper function
