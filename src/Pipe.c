@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "uthash.h"
+#include "Event.h"
+
 #define SIZE 10
 
 typedef enum StageType = {NORMAL, SPLIT, JOIN};
@@ -49,12 +54,23 @@ void join(Stage *s1, Stage *s2)
 	// Exclusive dummy stage for a join operation.
 	// Here there is only one dummy stage for s2, 
 	// no matter how many other stages join s2.
-	Stage *dummy = create_dummy_stage(s1, s2, PIPE);
+	Stage *dummy = create_dummy_stage(s1, s2);
 
 	memcpy(&s1->next, dummy, sizeof(Stage));
 	memcpy(dummy, &s2->next, sizeof(Stage));
 }
 
+Stage* create_stage(void)
+{
+	Stage *st = (Stage *)malloc(sizeof(Stage));
+
+	memset(st, 0, sizeof(Stage));
+	return st;
+}
+
+Stage* create_dummy_stage(Stage *s1, Stage *s2)
+{
+	Stage *
 Event execute_pipe(Stage *s, Event ev)
 {
 	Event tmpev;
