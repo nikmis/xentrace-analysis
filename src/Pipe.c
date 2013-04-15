@@ -40,6 +40,13 @@ void split(Stage *s1, Stage *s2)
 	}
 }
 
+void join(Stage *s1, Stage *s2)
+{
+	s1->nextType = JOIN;
+
+	memcpy(&s1->next, s2, sizeof(Stage));
+}
+
 Event execute_pipe(Stage *s, Event ev)
 {
 	Event tmpev;
@@ -63,7 +70,8 @@ Event execute_pipe(Stage *s, Event ev)
 					      }
 				      }
 				      break;
-			case JOIN   : break;
+			case JOIN   : 
+				      break;
 	}
 
 	return tmpev;
