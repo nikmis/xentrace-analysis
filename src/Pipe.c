@@ -1,6 +1,6 @@
 #define SIZE 10
 
-typedef Event (*StageFunc)(struct Stage *s, void *data);
+typedef Event (*StageFunc)(struct Stage *s, Event ev);
 
 typedef struct Stage
 {
@@ -23,4 +23,24 @@ void pipe(Stage *s1, Stage *s2)
 	}
 }
 
+Event execute_pipe(Stage *s, Event ev)
+{
+	Event tmpev;
+	event_init(&tmpev);
+
+	if(ev.id != INVALID)
+	{
+		tmpev = s->f(s, ev);	
+		
+		int i = 0;
+		// Doesnt account for logical OR and joins
+		while((i < SIZE) && (s->next[i] != NULL))
+		{
+			execute_pipe(s->next[i], tmpev);
+		}
+		
+	}
+
+	return tmpev;
+}
 
