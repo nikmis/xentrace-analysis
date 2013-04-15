@@ -44,7 +44,15 @@ void join(Stage *s1, Stage *s2)
 {
 	s1->nextType = JOIN;
 
-	memcpy(&s1->next, s2, sizeof(Stage));
+	// Dummy stage to keep track of joins.
+	//
+	// Exclusive dummy stage for a join operation.
+	// Here there is only one dummy stage for s2, 
+	// no matter how many other stages join s2.
+	Stage *dummy = create_dummy_stage(s1, s2, PIPE);
+
+	memcpy(&s1->next, dummy, sizeof(Stage));
+	memcpy(dummy, &s2->next, sizeof(Stage));
 }
 
 Event execute_pipe(Stage *s, Event ev)
@@ -70,8 +78,9 @@ Event execute_pipe(Stage *s, Event ev)
 					      }
 				      }
 				      break;
-			case JOIN   : 
+			case JOIN   : // 
 				      break;
+		}
 	}
 
 	return tmpev;
