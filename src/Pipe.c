@@ -5,6 +5,8 @@
 
 #define SIZE 10
 
+Stage *joinHash = NULL;
+
 typedef enum StageType = {NORMAL, SPLIT, JOIN};
 
 typedef Event (*StageFunc)(struct Stage *s, Event ev);
@@ -18,7 +20,7 @@ typedef struct Stage
 		StageFunc next;
 		StageFunc list_next[SIZE];
 	};
-
+	UT_hash_handle hh;
 } Stage;
 
 void pipe(Stage *s1, Stage *s2)
@@ -70,7 +72,38 @@ Stage* create_stage(void)
 
 Stage* create_dummy_stage(Stage *s1, Stage *s2)
 {
-	Stage *
+	Stage *dummy = NULL;
+
+	HASH_FIND_PTR(joinHash, s2, dummy);
+
+	if(!dummy) 
+	{
+		dummy = create_stage();
+		dummy->nextType = PIPE;
+
+		dummy->f = dummy_func;
+		
+		Event ev = create_dummy_event(s1);
+		//dummy->f(dummy, 
+		dummy->next = s2;
+
+		HASH_ADD_PTR(joinHash, next, dummy);
+	}
+
+	return dummy;
+}
+
+Event create_dummy_event(Stage *s)
+{
+	
+}
+
+Event dummy_func(struct Stage *s, Event ev)
+{
+	static Stage *joinStages[SIZE];
+	
+}
+
 Event execute_pipe(Stage *s, Event ev)
 {
 	Event tmpev;
