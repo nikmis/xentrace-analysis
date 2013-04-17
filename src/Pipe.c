@@ -17,9 +17,10 @@ typedef struct Stage
 	StageType nextType;
 	union
 	{
-		StageFunc next;
-		StageFunc list_next[SIZE];
+		struct Stage *next;
+		struct Stage *list_next[SIZE];
 	};
+	void **data;
 	UT_hash_handle hh;
 } Stage;
 
@@ -27,7 +28,7 @@ void pipe(Stage *s1, Stage *s2)
 {
 	s1->nextType = PIPE;
 
-	memcpy(&s1->next, s2, sizeof(Stage));
+	s1->next = s2;
 }
 
 void or(Stage *s1, Stage *s2)
@@ -39,7 +40,7 @@ void or(Stage *s1, Stage *s2)
 			i++;
 	if(i < SIZE)
 	{
-		memcpy(&s1->list_next[i], s2, sizeof(Stage));
+		s1->list_next[i] = s2;
 	}
 	else
 	{
@@ -56,7 +57,7 @@ void split(Stage *s1, Stage *s2)
 		i++;
 	if(i < SIZE)
 	{
-		memcpy(&s1->list_next[i], s2, sizeof(Stage));
+		s1->list_next[i] = s2;
 	}
 	else
 	{
@@ -73,10 +74,13 @@ void join(Stage *s1, Stage *s2)
 	// Exclusive dummy stage for a join operation.
 	// Here there is only one dummy stage for s2, 
 	// no matter how many other stages join s2.
-	Stage *dummy = create_dummy_stage(s1, s2);
-
-	memcpy(&s1->next, dummy, sizeof(Stage));
-	memcpy(dummy, &s2->next, sizeof(Stage));
+	Stage *dummy = create_dummy_stage(s2);
+	
+	int i = 0;
+	while((i < SIZE) && (dummy->data[i] != NULL))
+		i++;
+	s1->next = dummy;
+	dummy->data[i] = s1;
 }
 
 Stage* create_stage(void)
@@ -98,10 +102,12 @@ Stage* create_dummy_stage(Stage *s1, Stage *s2)
 		dummy = create_stage();
 		dummy->nextType = PIPE;
 
+		// Init list of Stage pointers that need to be joined.
+		dummy->data = (Stage **) malloc(sizeof(Stage *) * SIZE);
+		memset(dummy->data, 0, sizeof(Stage *) * SIZE);
+
 		dummy->f = dummy_func;
 		
-		Event ev = create_dummy_event(s1);
-		//dummy->f(dummy, 
 		dummy->next = s2;
 
 		HASH_ADD_PTR(joinHash, next, dummy);
@@ -161,4 +167,3 @@ Event execute_pipe(Stage *s, Event ev)
 
 	return tmpev;
 }
-
