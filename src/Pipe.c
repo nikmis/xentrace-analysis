@@ -9,7 +9,7 @@ Stage *joinHash = NULL;
 
 typedef enum StageType = {PIPE, OR, SPLIT, JOIN};
 
-typedef Event (*StageFunc)(struct Stage *s, Event ev);
+typedef Event (*StageFunc)(struct Stage *s, Event ev, void *stageData);
 
 typedef struct Stage
 {
@@ -20,9 +20,22 @@ typedef struct Stage
 		struct Stage *next;
 		struct Stage *list_next[SIZE];
 	};
-	void **data;
+	void *data;
 	UT_hash_handle hh;
 } Stage;
+
+typedef struct DummyStageData
+{
+	struct JoinArgs
+	{
+		Stage *s;
+		Event ev;
+	} JoinArgs;
+
+	JoinArgs args[SIZE];
+	int joinEdgeCount;
+	unsigned int joinEdgeFlags;
+} DummyStageData;
 
 void pipe(Stage *s1, Stage *s2)
 {
@@ -76,39 +89,51 @@ void join(Stage *s1, Stage *s2)
 	// no matter how many other stages join s2.
 	Stage *dummy = create_dummy_stage(s2);
 	
-	int i = 0;
-	while((i < SIZE) && (dummy->data[i] != NULL))
-		i++;
 	s1->next = dummy;
-	dummy->data[i] = s1;
+
+	int i = 0;
+	while((i < SIZE) && (dummy->data->args[i].s != NULL))
+		i++;
+	dummy->data->args[i].s = s1;
+
+	if(dummy->data->joinEdgeCount < SIZE)
+	{
+		dummy->data->joinEdgeCount++;
+	}
+	else
+	{
+		fprintf(stderr, "Cant Join stages. Exceeded join limit\n");
+		exit(0);
+	}
 }
 
-Stage* create_stage(void)
+Stage* create_stage(StageFunc f)
 {
 	Stage *st = (Stage *)malloc(sizeof(Stage));
 
 	memset(st, 0, sizeof(Stage));
+
+	st->f = f;
+
 	return st;
 }
 
-Stage* create_dummy_stage(Stage *s1, Stage *s2)
+Stage* create_dummy_stage(Stage *joinStage)
 {
 	Stage *dummy = NULL;
 
-	HASH_FIND_PTR(joinHash, s2, dummy);
+	HASH_FIND_PTR(joinHash, joinStage, dummy);
 
 	if(!dummy) 
 	{
-		dummy = create_stage();
+		dummy = create_stage(dummy_func);
 		dummy->nextType = PIPE;
 
 		// Init list of Stage pointers that need to be joined.
-		dummy->data = (Stage **) malloc(sizeof(Stage *) * SIZE);
-		memset(dummy->data, 0, sizeof(Stage *) * SIZE);
+		//dummy->data = (DummyStageData *) malloc(sizeof(DummyStageData) * SIZE);
+		memset(dummy->data, 0, sizeof(DummyStageData));
 
-		dummy->f = dummy_func;
-		
-		dummy->next = s2;
+		dummy->next = joinStage;
 
 		HASH_ADD_PTR(joinHash, next, dummy);
 	}
@@ -116,14 +141,34 @@ Stage* create_dummy_stage(Stage *s1, Stage *s2)
 	return dummy;
 }
 
-Event create_dummy_event(Stage *s)
+Event dummy_func(Stage *dummy, Event ev, void *data)
 {
-	
+	Stage *prevStage = (Stage *)data;
+
+	int i = 0, ev_count = 0;
+	while(i < dummy->data->joinEdgeCount) 
+	{
+		if(dummy->data[i].s == prevStage)
+		{
+			dummy->data[i].ev = ev;
+			unsetbit(&dummy->data->joinEdgeFlags, i);
+			break;
+		}
+		i++;
+	}
 }
 
-Event dummy_func(struct Stage *s, Event ev)
+void setbit(unsigned int *flag, int count)
 {
-	
+	unsigned int mask = 1 << (count-1);
+	*flag = *flag | mask;
+}
+
+void unsetbit(unsigned int *flag, int count)
+{
+	unsigned int mask = 1 << (c-1);
+	mask = ~mask;
+	*flag = *flag & mask;
 }
 
 Event execute_pipe(Stage *s, Event ev)
