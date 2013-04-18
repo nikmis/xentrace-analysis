@@ -158,6 +158,7 @@ Event dummy_func(Stage *dummy, Event ev, void *data)
 		i++;
 	}
 	// If dummy->data->joinEdgeFlags == 0 then all events received.
+	
 }
 
 void setbit(unsigned int *flag, int count)
@@ -170,6 +171,12 @@ void unsetbit(unsigned int *flag, int count)
 {
 	unsigned int mask = 1 << (c-1);
 	mask = ~mask;
+	*flag = *flag & mask;
+}
+
+void set_bit_count(unsigned int *flag, int count)
+{
+	unsigned int mask = ~((~0) << count);
 	*flag = *flag & mask;
 }
 
