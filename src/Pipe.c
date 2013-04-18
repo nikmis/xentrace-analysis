@@ -94,11 +94,12 @@ void join(Stage *s1, Stage *s2)
 	int i = 0;
 	while((i < SIZE) && (dummy->data->args[i].s != NULL))
 		i++;
-	dummy->data->args[i].s = s1;
 
 	if(dummy->data->joinEdgeCount < SIZE)
 	{
+		dummy->data->args[i].s = s1;
 		dummy->data->joinEdgeCount++;
+		setbit(&dummy->data->joinEdgeFlags, i);
 	}
 	else
 	{
@@ -156,6 +157,7 @@ Event dummy_func(Stage *dummy, Event ev, void *data)
 		}
 		i++;
 	}
+	// If dummy->data->joinEdgeFlags == 0 then all events received.
 }
 
 void setbit(unsigned int *flag, int count)
