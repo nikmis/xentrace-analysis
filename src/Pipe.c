@@ -158,7 +158,6 @@ Event dummy_func(Stage *dummy, Event ev, void *data)
 		i++;
 	}
 	// If dummy->data->joinEdgeFlags == 0 then all events received.
-	
 }
 
 void setbit(unsigned int *flag, int count)
@@ -187,35 +186,42 @@ Event execute_pipe(Stage *s, Event ev)
 
 	if(ev.id != INVALID)
 	{
-		tmpev = s->f(s, ev);	
+
+		tmpev = s->f(s, ev, NULL);	
 
 		switch(s->nextType)
 		{
-			case PIPE   : tmpev = execute_pipe(&s->next, tmpev);
-				      break;
+			case PIPE   : 	
+					tmpev = execute_pipe(s->next, tmpev);
+					break;
 			case OR     : 
-				    {
-					    int i = 0;
-					    Event ev = NULL;
-					    do
-					    {
-						    // invalid ev.id means bool false.
-						    // exec next stage.
-						    ev = execute_pipe(s->next[i], tmpev);
+					int i = 0;
+					Event ev = NULL;
+					do
+					{
+						// invalid ev.id means bool false.
+						// exec next stage.
+						ev = execute_pipe(s->next[i], tmpev);
 
-					    } while((i < SIZE) && (s->next[i] != NULL) && (ev.id == INVALID));
+					} while((i < SIZE) && (s->next[i] != NULL) && (ev.id == INVALID));
 			case SPLIT  : 
-				    {
-					    int i = 0;
-					    // Doesnt account for logical OR and joins
-					    while((i < SIZE) && (s->next[i] != NULL))
-					    {
-						    tmpev = execute_pipe(s->next[i], tmpev);
-					    }
-				    }
-				    break;
-			case JOIN   : // 
-				    break;
+					int i = 0;
+					// Doesnt account for logical OR and joins
+					while((i < SIZE) && (s->next[i] != NULL))
+					{
+						tmpev = execute_pipe(s->next[i], tmpev);
+					}
+					break;
+			case JOIN   :  
+					Stage *dummy = s->next;	
+
+					tmpev = dummy->f(dummy, tmpev, s);
+
+					if(dummy->data->joinEdgeFlags == 0)	
+					{
+						tmpev = execute_pipe(dummy->next,);
+					}
+					break;
 		}
 	}
 
