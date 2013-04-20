@@ -2,40 +2,11 @@
 #include <stdlib.h>
 #include "uthash.h"
 #include "Event.h"
+#include "Pipe.h"
 
 #define SIZE 10
 
 Stage *joinHash = NULL;
-
-typedef enum StageType = {PIPE, OR, SPLIT, JOIN};
-
-typedef Event (*StageFunc)(struct Stage *s, Event ev, void *stageData);
-
-typedef struct Stage
-{
-	StageFunc f;
-	StageType nextType;
-	union
-	{
-		struct Stage *next;
-		struct Stage *list_next[SIZE];
-	};
-	void *data;
-	UT_hash_handle hh;
-} Stage;
-
-typedef struct DummyStageData
-{
-	struct JoinArgs
-	{
-		Stage *s;
-		Event ev;
-	} JoinArgs;
-
-	struct JoinArgs args[SIZE];
-	int joinEdgeCount;
-	unsigned int joinEdgeFlags;
-} DummyStageData;
 
 void pipe(Stage *s1, Stage *s2)
 {
