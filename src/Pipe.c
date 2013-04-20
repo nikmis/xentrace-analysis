@@ -32,7 +32,7 @@ typedef struct DummyStageData
 		Event ev;
 	} JoinArgs;
 
-	JoinArgs args[SIZE];
+	struct JoinArgs args[SIZE];
 	int joinEdgeCount;
 	unsigned int joinEdgeFlags;
 } DummyStageData;
@@ -160,6 +160,23 @@ Event dummy_func(Stage *dummy, Event ev, void *data)
 	// If dummy->data->joinEdgeFlags == 0 then all events received.
 }
 
+Event typical_join_func(Stage *s, Event ev, void *data)
+{
+	// Wrapper function to parse dummy stage args
+	// and call actual function with parsed args.
+	int i = 0;
+	Event args[5]; // Whatever the number of args join event takes.
+
+	DummyStageData *dst = (DummyStageData *)data;
+	while(dst->args[i].s != NULL)
+	{
+		args[i] = dst->args[i].ev;
+	}
+
+	return actual_join_func(args[0], args[1], args[2], args[3], args[4]);
+}	
+
+
 void setbit(unsigned int *flag, int count)
 {
 	unsigned int mask = 1 << (count-1);
@@ -179,20 +196,19 @@ void set_bit_count(unsigned int *flag, int count)
 	*flag = *flag & mask;
 }
 
-Event execute_pipe(Stage *s, Event ev)
+Event execute_pipe(Stage *s, Event ev, void *data)
 {
 	Event tmpev;
 	event_init(&tmpev);
 
 	if(ev.id != INVALID)
 	{
-
-		tmpev = s->f(s, ev, NULL);	
+		tmpev = s->f(s, ev, data);	
 
 		switch(s->nextType)
 		{
 			case PIPE   : 	
-					tmpev = execute_pipe(s->next, tmpev);
+					tmpev = execute_pipe(s->next, tmpev, data);
 					break;
 			case OR     : 
 					int i = 0;
@@ -201,7 +217,7 @@ Event execute_pipe(Stage *s, Event ev)
 					{
 						// invalid ev.id means bool false.
 						// exec next stage.
-						ev = execute_pipe(s->next[i], tmpev);
+						ev = execute_pipe(s->next[i], tmpev, data);
 
 					} while((i < SIZE) && (s->next[i] != NULL) && (ev.id == INVALID));
 			case SPLIT  : 
@@ -209,17 +225,16 @@ Event execute_pipe(Stage *s, Event ev)
 					// Doesnt account for logical OR and joins
 					while((i < SIZE) && (s->next[i] != NULL))
 					{
-						tmpev = execute_pipe(s->next[i], tmpev);
+						tmpev = execute_pipe(s->next[i], tmpev, data);
 					}
 					break;
 			case JOIN   :  
 					Stage *dummy = s->next;	
-
 					tmpev = dummy->f(dummy, tmpev, s);
 
 					if(dummy->data->joinEdgeFlags == 0)	
 					{
-						tmpev = execute_pipe(dummy->next,);
+						tmpev = execute_pipe(dummy->next, tmpev, dummy->data);
 					}
 					break;
 		}
