@@ -18,6 +18,7 @@ typedef struct Stage
 		struct Stage *list_next[SIZE];
 	};
 	void *data;
+	DummyStageData *dst;
 	UT_hash_handle hh;
 } Stage;
 
@@ -48,5 +49,7 @@ Event typical_join_func(Stage *s, Event ev, void *data);
 void setbit(unsigned int *flag, int count);
 void unsetbit(unsigned int *flag, int count);
 void set_bit_count(unsigned int *flag, int count);
+void init_event(Event *ev);
 
 Event execute_pipe(Stage *s, Event ev, void *data);
+

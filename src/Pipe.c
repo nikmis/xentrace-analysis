@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include "uthash.h"
 #include "Event.h"
+#include "Macros.h"
 #include "Pipe.h"
 
 #define SIZE 10
 
-Stage *joinHash = NULL;
+Stage *dummyHash = NULL;
 
 void pipe(Stage *s1, Stage *s2)
 {
@@ -63,14 +64,14 @@ void join(Stage *s1, Stage *s2)
 	s1->next = dummy;
 
 	int i = 0;
-	while((i < SIZE) && (dummy->data->args[i].s != NULL))
+	while((i < SIZE) && (dummy->dst->args[i].s != NULL))
 		i++;
 
-	if(dummy->data->joinEdgeCount < SIZE)
+	if(dummy->dst->joinEdgeCount < SIZE)
 	{
-		dummy->data->args[i].s = s1;
-		dummy->data->joinEdgeCount++;
-		setbit(&dummy->data->joinEdgeFlags, i);
+		dummy->dst->args[i].s = s1;
+		dummy->dst->joinEdgeCount++;
+		setbit(&dummy->dst->joinEdgeFlags, i);
 	}
 	else
 	{
@@ -79,13 +80,14 @@ void join(Stage *s1, Stage *s2)
 	}
 }
 
-Stage* create_stage(StageFunc f)
+Stage* create_stage(StageFunc f, void *data)
 {
 	Stage *st = (Stage *)malloc(sizeof(Stage));
 
 	memset(st, 0, sizeof(Stage));
 
 	st->f = f;
+	st->data = data;
 
 	return st;
 }
@@ -94,7 +96,7 @@ Stage* create_dummy_stage(Stage *joinStage)
 {
 	Stage *dummy = NULL;
 
-	HASH_FIND_PTR(joinHash, joinStage, dummy);
+	HASH_FIND_PTR(dummyHash, joinStage, dummy);
 
 	if(!dummy) 
 	{
@@ -102,12 +104,12 @@ Stage* create_dummy_stage(Stage *joinStage)
 		dummy->nextType = PIPE;
 
 		// Init list of Stage pointers that need to be joined.
-		//dummy->data = (DummyStageData *) malloc(sizeof(DummyStageData) * SIZE);
-		memset(dummy->data, 0, sizeof(DummyStageData));
+		dummy->dst = (DummyStageData *) malloc(sizeof(DummyStageData) * SIZE);
+		memset(dummy->dst, 0, sizeof(DummyStageData));
 
 		dummy->next = joinStage;
 
-		HASH_ADD_PTR(joinHash, next, dummy);
+		HASH_ADD_PTR(dummyHash, next, dummy);
 	}
 
 	return dummy;
@@ -118,17 +120,17 @@ Event dummy_func(Stage *dummy, Event ev, void *data)
 	Stage *prevStage = (Stage *)data;
 
 	int i = 0, ev_count = 0;
-	while(i < dummy->data->joinEdgeCount) 
+	while(i < dummy->dst->joinEdgeCount) 
 	{
-		if(dummy->data[i].s == prevStage)
+		if(dummy->dst[i].s == prevStage)
 		{
-			dummy->data[i].ev = ev;
-			unsetbit(&dummy->data->joinEdgeFlags, i);
+			dummy->dst[i].ev = ev;
+			unsetbit(&dummy->dst->joinEdgeFlags, i);
 			break;
 		}
 		i++;
 	}
-	// If dummy->data->joinEdgeFlags == 0 then all events received.
+	// If dummy->dst->joinEdgeFlags == 0 then all events received.
 }
 
 Event typical_join_func(Stage *s, Event ev, void *data)
@@ -170,7 +172,7 @@ void set_bit_count(unsigned int *flag, int count)
 Event execute_pipe(Stage *s, Event ev, void *data)
 {
 	Event tmpev;
-	event_init(&tmpev);
+	init_event(&tmpev);
 
 	if(ev.id != INVALID)
 	{
@@ -203,13 +205,19 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 					Stage *dummy = s->next;	
 					tmpev = dummy->f(dummy, tmpev, s);
 
-					if(dummy->data->joinEdgeFlags == 0)	
+					if(dummy->dst->joinEdgeFlags == 0)	
 					{
-						tmpev = execute_pipe(dummy->next, tmpev, dummy->data);
+						tmpev = execute_pipe(dummy->next, tmpev, dummy->dst);
 					}
 					break;
 		}
 	}
 
 	return tmpev;
+}
+
+void init_event(Event *ev)
+{
+	memset(ev, 0, sizeof(Event));
+	ev->id = INVALID;
 }

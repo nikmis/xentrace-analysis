@@ -26,6 +26,7 @@
 #ifndef __XEN_PUBLIC_TRACE_H__
 #define __XEN_PUBLIC_TRACE_H__
 
+#define INVALID	    0x0
 /* Trace classes */
 #define TRC_CLS_SHIFT 16
 #define TRC_GEN     0x0001f000    /* General trace            */
