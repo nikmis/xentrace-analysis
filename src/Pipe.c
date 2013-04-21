@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "uthash.h"
 #include "Event.h"
-#include "Macros.h"
+#include "Trace.h"
 #include "Pipe.h"
 
 #define SIZE 10
@@ -80,16 +80,22 @@ void join(Stage *s1, Stage *s2)
 	}
 }
 
-Stage* create_stage(StageFunc f, void *data)
+Stage* create_stage(StageFunc f, FreeStageData fsd, void *data)
 {
 	Stage *st = (Stage *)malloc(sizeof(Stage));
 
 	memset(st, 0, sizeof(Stage));
 
 	st->f = f;
+	st->fsd = fsd;
 	st->data = data;
 
 	return st;
+}
+
+void free_stage(Stage *s)
+{
+	s->fsd(s);
 }
 
 Stage* create_dummy_stage(Stage *joinStage)
@@ -100,7 +106,7 @@ Stage* create_dummy_stage(Stage *joinStage)
 
 	if(!dummy) 
 	{
-		dummy = create_stage(dummy_func);
+		dummy = create_stage(dummy_func, free_dummy_func, NULL);
 		dummy->nextType = PIPE;
 
 		// Init list of Stage pointers that need to be joined.
@@ -117,22 +123,34 @@ Stage* create_dummy_stage(Stage *joinStage)
 
 Event dummy_func(Stage *dummy, Event ev, void *data)
 {
+	Event tmpev;
+	init_event(&tmpev);
+
 	Stage *prevStage = (Stage *)data;
 
-	int i = 0, ev_count = 0;
+	int i = 0;
 	while(i < dummy->dst->joinEdgeCount) 
 	{
-		if(dummy->dst[i].s == prevStage)
+		if(dummy->dst->args[i].s == prevStage)
 		{
-			dummy->dst[i].ev = ev;
+			dummy->dst->args[i].ev = ev;
 			unsetbit(&dummy->dst->joinEdgeFlags, i);
 			break;
 		}
 		i++;
 	}
+
+	return tmpev;
+
 	// If dummy->dst->joinEdgeFlags == 0 then all events received.
 }
 
+void free_dummy_func(Stage *dummy)
+{
+	free(dummy->dst);
+}
+
+/*
 Event typical_join_func(Stage *s, Event ev, void *data)
 {
 	// Wrapper function to parse dummy stage args
@@ -149,7 +167,7 @@ Event typical_join_func(Stage *s, Event ev, void *data)
 	return actual_join_func(args[0], args[1], args[2], args[3], args[4]);
 }	
 
-
+*/
 void setbit(unsigned int *flag, int count)
 {
 	unsigned int mask = 1 << (count-1);
@@ -158,7 +176,7 @@ void setbit(unsigned int *flag, int count)
 
 void unsetbit(unsigned int *flag, int count)
 {
-	unsigned int mask = 1 << (c-1);
+	unsigned int mask = 1 << (count-1);
 	mask = ~mask;
 	*flag = *flag & mask;
 }
@@ -174,7 +192,7 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 	Event tmpev;
 	init_event(&tmpev);
 
-	if(ev.id != INVALID)
+	if(ev.event_id != INVALID)
 	{
 		tmpev = s->f(s, ev, data);	
 
@@ -184,30 +202,38 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 					tmpev = execute_pipe(s->next, tmpev, data);
 					break;
 			case OR     : 
-					int i = 0;
-					Event ev = NULL;
-					do
 					{
-						// invalid ev.id means bool false.
-						// exec next stage.
-						ev = execute_pipe(s->next[i], tmpev, data);
+						int i = 0;
+						Event ev;
+						init_event(&ev);
+						do
+						{
+							// invalid ev.event_id means bool false.
+							// exec next stage.
+							ev = execute_pipe(s->list_next[i], tmpev, data);
 
-					} while((i < SIZE) && (s->next[i] != NULL) && (ev.id == INVALID));
+						} while((i < SIZE) && (s->list_next[i] != NULL) && (ev.event_id == INVALID));
+					}
+					break;
 			case SPLIT  : 
-					int i = 0;
-					// Doesnt account for logical OR and joins
-					while((i < SIZE) && (s->next[i] != NULL))
 					{
-						tmpev = execute_pipe(s->next[i], tmpev, data);
+						int i = 0;
+						// Doesnt account for logical OR and joins
+						while((i < SIZE) && (s->list_next[i] != NULL))
+						{
+							tmpev = execute_pipe(s->list_next[i], tmpev, data);
+						}
 					}
 					break;
 			case JOIN   :  
-					Stage *dummy = s->next;	
-					tmpev = dummy->f(dummy, tmpev, s);
-
-					if(dummy->dst->joinEdgeFlags == 0)	
 					{
-						tmpev = execute_pipe(dummy->next, tmpev, dummy->dst);
+						Stage *dummy = s->next;	
+						tmpev = dummy->f(dummy, tmpev, s);
+
+						if(dummy->dst->joinEdgeFlags == 0)	
+						{
+							tmpev = execute_pipe(dummy->next, tmpev, dummy->dst);
+						} 
 					}
 					break;
 		}
@@ -219,5 +245,5 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 void init_event(Event *ev)
 {
 	memset(ev, 0, sizeof(Event));
-	ev->id = INVALID;
+	ev->event_id = INVALID;
 }
