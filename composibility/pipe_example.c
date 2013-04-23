@@ -3,6 +3,7 @@
 #include "Parse.h"
 #include "Pipe.h"
 #include "Stages.h"
+#include "Trace.h"
 
 #define COUNT 10000000
 
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
 
 	//Stage *s = build_tree();
 
-	Stage *s1 = create_stage(event_id, free_event_id, (int []){TRAP});
+	Stage *s1 = create_stage(event_id, free_event_id, (int []){TRC_EXIT_TO_GUEST});
 	Stage *s2 = create_stage(count, free_count, NULL);
 
 	pipe(s1, s2);

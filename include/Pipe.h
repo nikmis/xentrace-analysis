@@ -12,7 +12,8 @@ typedef enum
 	PIPE, 
 	OR, 
 	SPLIT, 
-	JOIN
+	JOIN_OR,
+	JOIN_SPLIT
 } StageType;
 
 struct Stage;
@@ -52,7 +53,7 @@ typedef struct DummyStageData
 void pipe(Stage *s1, Stage *s2);
 void or(Stage *s1, Stage *s2);
 void split(Stage *s1, Stage *s2);
-void join(Stage *s1, Stage *s2);
+void join(Stage *s1, Stage *s2, StageType type);
 
 Stage* create_stage(StageFunc f, FreeStageData fsd,void *data);
 void free_stage(Stage *s);
