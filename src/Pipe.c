@@ -197,6 +197,7 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 
 	if(ev.event_id != INVALID) 
 	{
+		// For null stage.
 		if(s->f != NULL)
 		{
 			tmpev = s->f(s, ev, data);	
@@ -204,6 +205,8 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 		else
 			tmpev = ev;
 
+		// If running a stage resulted in NULL event, then
+		// do not proceed executing the rest of the pipe
 		if(tmpev.event_id == INVALID)
 			return tmpev;
 
