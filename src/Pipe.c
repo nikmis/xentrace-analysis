@@ -188,7 +188,7 @@ void unsetbit(unsigned int *flag, int count)
 void set_bit_count(unsigned int *flag, int count)
 {
 	unsigned int mask = ~((~0) << count);
-	*flag = *flag & mask;
+	*flag = *flag | mask;
 }
 
 Event execute_pipe(Stage *s, Event ev, void *data)
@@ -274,6 +274,7 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 						tmpev = execute_pipe(dummy->next, tmpev, dummy->dst);
 						set_bit_count(&dummy->dst->joinEdgeFlags, dummy->dst->joinEdgeCount);
 					} 
+
 				}
 				break;
 		}

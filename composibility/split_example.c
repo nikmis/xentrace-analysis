@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 			break;
 		execute_pipe(s0, event, NULL);
 	} while(!feof(fp));
-	//} while(i < 10000);
+	//} while(i < 14000);
 
 	free_stage(s1);
 	free_stage(s2);

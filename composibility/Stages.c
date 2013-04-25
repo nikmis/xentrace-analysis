@@ -90,6 +90,7 @@ Event wait_time_t(Stage *s, Event ev1, Event ev2)
 	Event tmpev;
 	init_event(&tmpev);
 
+
 	if(s->data == NULL)
 	{
 		s->data = (unsigned long long *)malloc(sizeof(unsigned long long));
