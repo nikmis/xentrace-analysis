@@ -12,7 +12,7 @@ vpath %.h .
 vpath %.c ../src
 vpath %.c .
 
-all: pipe or
+all: pipe or split
 	rm -f *.o
 
 pipe: pipe_example.c $(OBJS) Macros.h Trace.h
@@ -20,6 +20,9 @@ pipe: pipe_example.c $(OBJS) Macros.h Trace.h
 
 or: or_example.c $(OBJS) Macros.h Trace.h
 	$(CC) $(INC) $<  *.o -o ../bin/or_example.out	
+
+split: split_example.c $(OBJS) Macros.h Trace.h
+	$(CC) $(INC) $<  *.o -o ../bin/split_example.out	
 
 Event.o: Event.c Event.h Macros.h Trace.h
 	$(CC) $(INC) -c $< -o $@

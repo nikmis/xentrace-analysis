@@ -71,7 +71,8 @@ void join(Stage *s1, Stage *s2, StageType type)
 	{
 		dummy->dst->args[i].s = s1;
 		dummy->dst->joinEdgeCount++;
-		setbit(&dummy->dst->joinEdgeFlags, i);
+		setbit(&dummy->dst->joinEdgeFlags, dummy->dst->joinEdgeCount);
+		//printf("dummy %p count %u flag %x\n", dummy, dummy->dst->joinEdgeCount, dummy->dst->joinEdgeFlags);
 	}
 	else
 	{
@@ -102,7 +103,7 @@ Stage* create_dummy_stage(Stage *joinStage)
 {
 	Stage *dummy = NULL;
 
-	HASH_FIND_PTR(dummyHash, joinStage, dummy);
+	HASH_FIND_PTR(dummyHash, &joinStage, dummy);
 
 	if(!dummy) 
 	{
@@ -137,7 +138,7 @@ Event dummy_func(Stage *dummy, Event ev, void *data)
 		if(dummy->dst->args[i].s == prevStage)
 		{
 			dummy->dst->args[i].ev = ev;
-			unsetbit(&dummy->dst->joinEdgeFlags, i);
+			unsetbit(&dummy->dst->joinEdgeFlags, i+1);
 			break;
 		}
 		i++;
@@ -169,8 +170,8 @@ Event typical_join_func(Stage *s, Event ev, void *data)
 
 	return actual_join_func(args[0], args[1], args[2], args[3], args[4]);
 }	
-
 */
+
 void setbit(unsigned int *flag, int count)
 {
 	unsigned int mask = 1 << (count-1);
@@ -253,10 +254,11 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 			case SPLIT  : 
 				{
 					int i = 0;
-					// Doesnt account for logical OR and joins
+					Event ev;
+					init_event(&ev);
 					while((i < SIZE) && (s->list_next[i] != NULL))
 					{
-						tmpev = execute_pipe(s->list_next[i], tmpev, data);
+						ev = execute_pipe(s->list_next[i], tmpev, data);
 						i++;
 					}
 				}
