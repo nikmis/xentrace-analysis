@@ -85,11 +85,12 @@ Event wait_time(Stage *s, Event ev, void *data)
 	return wait_time_t(s, args[0], args[1]);
 }
 
+// Try using Queue_wait.h funcs.
+// This is just example. Doesn't work reliably.
 Event wait_time_t(Stage *s, Event ev1, Event ev2)
 {
 	Event tmpev;
 	init_event(&tmpev);
-
 
 	if(s->data == NULL)
 	{
@@ -104,6 +105,7 @@ Event wait_time_t(Stage *s, Event ev1, Event ev2)
 
 	*(unsigned long long *)s->data += diff;
 
+	// For custom event store data in this stage and pass onto next
 	tmpev.data[0] = *(unsigned long long *)s->data;
 
 	return tmpev;
