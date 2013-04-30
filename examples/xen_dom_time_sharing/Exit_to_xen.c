@@ -120,7 +120,8 @@ int exit_to_xen_finalize(EventHandler *handler)
 
 	tmpDomRuntime = NULL;
 
-	list_for_each_entry_reverse(tmpDomRuntime, head, cpuList)
+	DomRuntime *t;
+	list_for_each_entry_safe(tmpDomRuntime, t, head, cpuList)
 	{
 		free(tmpDomRuntime);
 	}

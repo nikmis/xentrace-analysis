@@ -99,7 +99,8 @@ int exit_to_guest_finalize(EventHandler *handler)
 
 	printf("\nTotal time spent in Xen: %15.3f (ms)\n", (float)totalXenRuntime/MEGA);
 
-	list_for_each_entry_reverse(tmpXenRuntime, head, cpuList)
+	XenRuntime *t;
+	list_for_each_entry_safe(tmpXenRuntime, t, head, cpuList)
 	{
 		free(tmpXenRuntime);
 	}
