@@ -3,6 +3,11 @@
 *.swp
 *.swo
 *.dat
+*.pyc
+.depend
+peg_peg.py
+examples/calc/calc
+examples/pipes/pipes
 bin/
 cscope.files
 tags

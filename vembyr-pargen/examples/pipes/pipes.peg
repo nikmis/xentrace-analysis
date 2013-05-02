@@ -1,0 +1,47 @@
+start-symbol: start 
+options: debug9
+code: {{
+//extern "C"
+}}
+rules:
+	start = expression sw <eof> {{ value = $1; }}
+	expression = expression2 expression1_rest($1)
+	expression1_rest(a) = "+" expression2 e:{{std::cout << "Found +" << std::endl;}} expression1_rest(e)
+				| "or" expression2 e:{{std::cout << "Found or" << std::endl;}} expression1_rest(e)
+				| <void> {{ value = a; }}
+	expression2 = expression3 expression2_rest($1)
+	expression2_rest(a) = "|" expression3 e:{{std::cout << "Found pipe" << std::endl;}} expression2_rest(e)
+				| <void>
+	expression3 = operator {{std::cout << "Found operator" << std::endl;}}
+				| "(" expression ")" {{ std::cout << "Found ()" << std::endl; }}
+				| <void>
+	operator = name "(" params? ")"
+	params = param {{ std::cout << "Found param" << std::endl;}} params_rest
+	params_rest = "," params {{ std::cout << "Found more params" << std::endl;}}
+				| <void> 
+
+	inline name = letter+ {{
+		std::ostringstream total;
+		for (Value::iterator it = $1.getValues().begin(); it !=	$1.getValues().end(); it++){
+			const Value & v = *it;
+			char letter = (char) (int) v.getValue();
+			total << letter;
+		}
+		
+		std::cout << "Found name:" << total.str() << std::endl;
+		value = new std::string(total.str());
+
+	}}
+        param = number
+	inline number = digit+ {{
+	int total = 0;
+	for (Value::iterator it = $1.getValues().begin(); it !=	$1.getValues().end(); it++){
+		const Value & v = *it;
+		char letter = (char) (int) v.getValue();
+		total = (total * 10) + letter - '0';
+	}
+	value = (void*) total;
+	}}
+	inline sw = "\\n"*
+	inline digit = [0123456789]
+	inline letter = [ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]
