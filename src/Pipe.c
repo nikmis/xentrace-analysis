@@ -245,6 +245,8 @@ Event execute_pipe(Stage *s, Event ev, void *data)
 
 					if(dummy->dst->joinEdgeFlags < (exp - 1))
 					{
+						// Maybe you should just return from here so that OR doesnt fail.
+						// Check later.
 						tmpev = execute_pipe(dummy->next, tmpev, dummy->dst);
 						set_bit_count(&dummy->dst->joinEdgeFlags, dummy->dst->joinEdgeCount);
 					} 

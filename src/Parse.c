@@ -109,3 +109,18 @@ int parse_return_next_event(Event *ev)
 
 	return SUCCESS;
 }
+
+/*
+int get_num_cpus(void)
+{
+	Parse *p = get_parse();
+	
+	if(!self->setup_flag)
+	{
+		fprintf(stderr, "Parser not initialized\n");
+		return -1;
+	}
+
+	return p->numCpus;
+}
+*/
