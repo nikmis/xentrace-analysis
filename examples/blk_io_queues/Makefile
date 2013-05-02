@@ -5,6 +5,8 @@ INC=-I../../include
 OBJS=	Event.o\
 	EventHandler.o\
 	Reader.o\
+	Parse.o\
+	ParseHeap.o\
 	CpuList.o\
 	Queue_state.o\
 	Wait_state.o\
@@ -49,6 +51,12 @@ EventHandler.o: EventHandler.c EventHandler.h Macros.h list.h
 	$(CC) $(INC) -c $< -o $@
 
 Reader.o: Reader.c Reader.h Macros.h
+	$(CC) $(INC) -c $< -o $@
+
+Parse.o: Parse.c Parse.h Macros.h Trace.h
+	$(CC) $(INC) -c $< -o $@
+
+ParseHeap.o: ParseHeap.c Parse.h Macros.h Trace.h
 	$(CC) $(INC) -c $< -o $@
 
 CpuList.o: CpuList.c CpuList.h list.h Event.h
